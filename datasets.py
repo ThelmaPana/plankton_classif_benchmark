@@ -6,6 +6,8 @@ from sklearn.preprocessing import MinMaxScaler, MultiLabelBinarizer
 from tensorflow.keras import utils
 import cv2
 import lycon
+import random
+import matplotlib.pyplot as plt
 
 
 def read_data_cnn(path, random_state=None):
@@ -145,6 +147,28 @@ class DataGenerator(utils.Sequence):
         # Return reshaped images with labels
         return square_images, labels
     
+
+def batch_glimpse(batches, classes):
+    """
+    Randomly select an image from a batch and display it with its label
+    
+    Args:
+        batches (str): 
+        classes (array): array of taxonomic classes
+    
+    Returns:
+        nothing
+        
+    """
+
+    b = random.randint(0, len(batches)-1)
+    image_batch, label_batch = batches[b]
+    i = random.randint(0, len(label_batch)-1)
+    plt.imshow(image_batch[i][:,:,0], cmap='gray')
+    plt.title(classes[np.argmax(label_batch[i])])
+    plt.show()
+    pass
+
 
 def read_data_rf(path, random_state=None):
     """

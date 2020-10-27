@@ -1,8 +1,9 @@
 import tensorflow as tf
 import tensorflow_hub as hub
 import tensorflow_addons as tfa
-from tensorflow.keras import layers, optimizers, losses #, applications, models, backend, experimental
+from tensorflow.keras import layers, optimizers, losses, callbacks #, applications, models, backend, experimental
 import tensorflow_addons as tfa
+import os
 
 
 
@@ -95,3 +96,50 @@ def compile_cnn(model, initial_lr, steps_per_epoch, lr_method='constant', decay_
     )
     
     return model
+
+
+def train_cnn(model, train_batches, valid_batches, batch_size, epochs, output_dir):
+    """
+    Trains a CNN model. 
+    
+    Args:
+        model (tensorflow.python.keras.engine.sequential.Sequential): CNN model to train
+        train_batches
+        train_batches
+        batch_size (int): size if batches
+        epochs (int): number of epochs to train for
+        output_dir (str): directory where to save model weights
+
+    
+    Returns:
+        nothing
+        
+    """
+    #TODO add class weights
+    # Set callbacks
+    filepath = os.path.join(output_dir, "weights.{epoch:02d}.hdf5")
+    cp_callback = callbacks.ModelCheckpoint(
+        filepath=filepath,
+        monitor='val_loss',
+        save_best_only=True,
+        mode='min',
+        save_weights_only=True,
+        save_freq='epoch',
+        verbose=1)
+
+    # Compute number of steps per epochs     
+    steps_per_epoch = len(train_batches)//batch_size
+    validation_steps = len(valid_batches)//batch_size
+    
+    # Fit the model.
+    history = model.fit(
+        train_batches, 
+        epochs=epochs,
+        steps_per_epoch=steps_per_epoch,
+        validation_data=valid_batches,
+        validation_steps=validation_steps,
+        callbacks=[cp_callback]
+        #class_weight=class_weights
+    )
+    
+    return history

@@ -5,9 +5,16 @@ import pandas as pd
 import numpy as np
 import datasets
 import model_cnn
-#import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
+import tensorflow as tf
+import random
 
 #################################### Settings ####################################
+output_dir = 'cnn_output'
+# Check if output_dir exists, if not create it
+if not os.path.exists(output_dir):
+    os.mkdir(output_dir)
+
 ## Data
 instrument = "isiis"
 data_dir = os.path.join('data', instrument)
@@ -19,6 +26,8 @@ shuffle=True
 px_del = 0
 preserve_size=False
 
+glimpse = False
+
 ## CNN model
 # architecture
 fc_layers_nb = 2
@@ -29,9 +38,9 @@ classif_layer_dropout = 0.2
 train_layers = 'all'
 
 # Training
-initial_epochs = 50
+epochs = 5
 #initial_epochs = 1
-steps_per_epoch = 500//batch_size
+#steps_per_epoch = 500//batch_size
 
 # Compilation
 lr_method = 'decay' # or could be 'constant'
@@ -46,7 +55,7 @@ df_train, df_valid, df_test = datasets.read_data_cnn(
     path = os.path.join(data_dir, 'isiis_data.csv'),
     random_state=random_state)
 
-
+#df_train.groupby('classif_id').size()
 # Number of plankton classes to predict
 nb_classes = df_train['classif_id'].nunique()
 classes = df_train['classif_id'].unique()
@@ -79,6 +88,13 @@ for image_batch, label_batch in train_batches:
     print("Label batch shape: ", label_batch.shape)
     break
 
+# glimpse at batch
+if glimpse:
+    datasets.batch_glimpse(train_batches, classes)
+
+    
+
+
 ## Generate CNN
 my_cnn = model_cnn.create_cnn(
     fc_layers_nb,
@@ -93,8 +109,12 @@ my_cnn = model_cnn.create_cnn(
 my_cnn = model_cnn.compile_cnn(
     my_cnn, 
     initial_lr, 
-    steps_per_epoch, 
-    lr_method='constant', 
-    decay_rate=None, 
-    loss='cce'
+    steps_per_epoch=len(train_batches)//epochs, 
+    lr_method=lr_method, 
+    decay_rate=decay_rate, 
+    loss=loss
 )
+
+## Train CNN
+history = model_cnn.train_cnn(my_cnn, train_batches, valid_batches, batch_size, epochs, output_dir)
+
