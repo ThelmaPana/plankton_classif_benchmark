@@ -1,8 +1,8 @@
 import tensorflow as tf
 import tensorflow_hub as hub
 import tensorflow_addons as tfa
-#from tensorflow.keras.losses import Reduction
-from tensorflow.keras import layers#, applications, models, backend, experimental
+from tensorflow.keras import layers, optimizers, losses #, applications, models, backend, experimental
+import tensorflow_addons as tfa
 
 
 
@@ -50,3 +50,48 @@ def create_cnn(fc_layers_nb, fc_layers_dropout, fc_layers_size, classif_layer_dr
 
     return model
 
+def compile_cnn(model, initial_lr, steps_per_epoch, lr_method='constant', decay_rate=None, loss='cce'):
+    """
+    Compiles a CNN model. 
+    
+    Args:
+        model (tensorflow.python.keras.engine.sequential.Sequential): CNN model to compile
+        lr_method (str): method for learning rate. 'constant' for a constant learning rate, 'decay' for a decay
+        initial_lr (float): initial learning rate. If lr_method is 'constant', set learning rate to this value
+        steps_per_epochs (int): number of training steps at each epoch. Usually number_of_epochs // batch_size
+        decay_rate (float): rate for learning rate decay
+        loss (str): method to compute loss. 'cce' for CategoricalCrossentropy (see https://www.tensorflow.org/api_docs/python/tf/keras/losses/CategoricalCrossentropy), 'sfce' for SigmoidFocalCrossEntropy (see https://www.tensorflow.org/addons/api_docs/python/tfa/losses/SigmoidFocalCrossEntropy), usefull for unbalanced classes
+
+    
+    Returns:
+        model (tensorflow.python.keras.engine.sequential.Sequential): compiled CNN model
+        
+    """
+    # TODO if lr_method='decay', decay_rate in mandatory
+
+    ## Learning rate
+    if lr_method == 'decay':
+        lr = optimizers.schedules.InverseTimeDecay(
+                    initial_lr, steps_per_epoch, decay_rate, staircase=False, name=None
+        )
+    else: # Keep constant learning rate
+        lr = initial_lr
+    
+    ## Optimizer: use Adam
+    optimizer = optimizers.Adam(learning_rate=lr)
+    
+    
+    ## Loss
+    if loss == 'cce':
+        loss = losses.CategoricalCrossentropy(from_logits=True,reduction=losses.Reduction.SUM_OVER_BATCH_SIZE)
+    elif loss == 'sfce':
+        loss = tfa.losses.SigmoidFocalCrossEntropy(from_logits=True,reduction=losses.Reduction.SUM_OVER_BATCH_SIZE)
+    
+    
+    model.compile(
+      optimizer=optimizer,
+      loss=loss,
+      metrics='accuracy'
+    )
+    
+    return model
