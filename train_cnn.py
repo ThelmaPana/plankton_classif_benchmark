@@ -1,8 +1,11 @@
 import os
+import lycon
+import cv2
+import pandas as pd
+import numpy as np
 import datasets
 import model_cnn
-#from tensorflow.keras import layers, optimizers, losses #, applications, models, backend, experimental
-#import tensorflow_addons as tfa
+#import matplotlib.pyplot as plt
 
 #################################### Settings ####################################
 ## Data
@@ -10,6 +13,11 @@ instrument = "isiis"
 data_dir = os.path.join('data', instrument)
 random_state = 42
 batch_size = 32
+image_dimensions = (224, 224, 3)
+shuffle=True
+#augment=False #TODO
+px_del = 0
+preserve_size=False
 
 ## CNN model
 # architecture
@@ -41,6 +49,35 @@ df_train, df_valid, df_test = datasets.read_data_cnn(
 
 # Number of plankton classes to predict
 nb_classes = df_train['classif_id'].nunique()
+classes = df_train['classif_id'].unique()
+
+
+## Generate batches
+train_batches = datasets.DataGenerator(
+    df=df_train,
+    data_dir=data_dir,
+    batch_size=batch_size, 
+    px_del=px_del, 
+    shuffle=shuffle)
+
+valid_batches = datasets.DataGenerator(
+    df=df_valid,
+    data_dir=data_dir,
+    batch_size=batch_size, 
+    px_del=px_del, 
+    shuffle=shuffle)
+
+test_batches = datasets.DataGenerator(
+    df=df_test,
+    data_dir=data_dir,
+    batch_size=batch_size, 
+    px_del=px_del, 
+    shuffle=shuffle)
+
+for image_batch, label_batch in train_batches:
+    print("Image batch shape: ", image_batch.shape)
+    print("Label batch shape: ", label_batch.shape)
+    break
 
 ## Generate CNN
 my_cnn = model_cnn.create_cnn(

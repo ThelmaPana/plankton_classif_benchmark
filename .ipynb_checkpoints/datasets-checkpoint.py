@@ -2,7 +2,10 @@ import os
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import MinMaxScaler
+from sklearn.preprocessing import MinMaxScaler, MultiLabelBinarizer
+from tensorflow.keras import utils
+import cv2
+import lycon
 
 
 def read_data_cnn(path, random_state=None):
@@ -48,6 +51,100 @@ def read_data_cnn(path, random_state=None):
   
     return df_train, df_val, df_test
 
+
+## Define a data generator 
+class DataGenerator(utils.Sequence):
+    'Generates data for Keras'
+    def __init__(self, df, data_dir, batch_size=32, image_dimensions = (224, 224, 3), shuffle=False, augment=False, px_del = 0, preserve_size=False):
+        self.df               = df                  # dataframe with path to images and classif_id
+        self.data_dir         = data_dir            # directory containing data
+        self.dim              = image_dimensions    # image dimensions
+        self.batch_size       = batch_size          # batch size
+        self.image_dimensions = image_dimensions    # image_dimensions
+        self.shuffle          = shuffle             # shuffle bool
+        self.augment          = augment             # augment bool
+        self.px_del           = px_del              # pixels to delete at bottom of images (scale bar)  
+        self.preserve_size    = preserve_size       # preserve_size bool         
+        self.on_epoch_end()
+
+    def __len__(self):
+        'Denotes the number of batches per epoch'
+        return int(np.floor(len(self.df) / self.batch_size))
+
+    def on_epoch_end(self):
+        'Updates indexes after each epoch'
+        self.indexes = np.arange(len(self.df))
+        if self.shuffle:
+            #np.random.shuffle(self.indexes)
+            self.df = self.df.sample(frac=1).reset_index(drop=True)
+            
+    def class_encoder(self):
+        'Encodes classes with multi label binarizer'
+        mlb = MultiLabelBinarizer()
+        classif_id = self.df['classif_id'].tolist()
+        classif_id_enc = mlb.fit_transform([[c] for c in classif_id])
+        return classif_id_enc
+
+
+    def __getitem__(self, index):
+        'Generate one batch of data'
+        # selects indices of data for next batch
+        indexes = self.indexes[index * self.batch_size : (index + 1) * self.batch_size]
+
+        # select data and load images
+        #images = [cv2.imread(self.df.path_to_img[k])/255 for k in indexes]
+        paths = [os.path.join(self.data_dir, self.df.path_to_img[k]) for k in indexes]
+        images = [cv2.imread(p)/255 for p in paths]
+        
+        square_images = []
+        output_size = self.image_dimensions[0]
+        # resize images to proper dimension
+        for img in images:
+            h = img.shape[0]
+            w = img.shape[1] 
+            
+            # delete scale bar of 31px at bottom of image
+            img = img[0:h-self.px_del,:]
+            h = img.shape[0]
+            
+            # compute largest dimension (hor or ver)
+            dim_max = int(max(h, w))
+            
+            # if size is not preserved or image is larger than output_size, resize image to output_size
+            if not(self.preserve_size) or (dim_max > output_size):
+                # Resize image so that largest dim is now equal to output_size
+                img = lycon.resize(
+                    img, 
+                    height = max(h*output_size//max(h,w),1), 
+                    width = max(w*output_size//max(h,w),1), 
+                    interpolation=lycon.Interpolation.AREA
+                )
+                h = img.shape[0]
+                w = img.shape[1]  
+            
+            # create a square, blank output, of desired dimension
+            #img_square = np.ones(output_shape)
+            img_square = np.ones(self.image_dimensions)
+            
+            # compute number of pixels to leave blank 
+            offset_ver = int((output_size-h)/2) # on top and bottom of image
+            offset_hor = int((output_size-w)/2) # on left and right of image
+            
+            # replace pixels in output by input image
+            img_square[offset_ver:offset_ver+img.shape[0], offset_hor:offset_hor+img.shape[1]] = img
+            square_images.append(img_square)
+        
+        # convert to array of images        
+        square_images = np.array([img for img in square_images], dtype='float32')
+        
+        ## Labels
+        classif_id_enc = self.class_encoder()
+        labels = [classif_id_enc[k].tolist() for k in indexes]
+        labels = np.array(labels, dtype='float32')
+        
+        # Return reshaped images with labels
+        return square_images, labels
+    
 
 def read_data_rf(path, random_state=None):
     """
