@@ -7,7 +7,6 @@ import datasets
 import model_cnn
 import matplotlib.pyplot as plt
 import tensorflow as tf
-import random
 
 #################################### Settings ####################################
 output_dir = 'cnn_output'
@@ -39,11 +38,9 @@ train_layers = 'all'
 
 # Training
 epochs = 5
-#initial_epochs = 1
-#steps_per_epoch = 500//batch_size
 
 # Compilation
-lr_method = 'decay' # or could be 'constant'
+lr_method = 'decay' # or 'constant'
 initial_lr = 0.001
 decay_rate = 0.97
 loss = 'sfce' # or 'sfce'
@@ -117,4 +114,7 @@ my_cnn = model_cnn.compile_cnn(
 
 ## Train CNN
 history = model_cnn.train_cnn(my_cnn, train_batches, valid_batches, batch_size, epochs, output_dir)
+    
+
+
 

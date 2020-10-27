@@ -4,6 +4,7 @@ import tensorflow_addons as tfa
 from tensorflow.keras import layers, optimizers, losses, callbacks #, applications, models, backend, experimental
 import tensorflow_addons as tfa
 import os
+import pickle
 
 
 
@@ -141,5 +142,9 @@ def train_cnn(model, train_batches, valid_batches, batch_size, epochs, output_di
         callbacks=[cp_callback]
         #class_weight=class_weights
     )
+    
+    # Write training history 
+    with open(os.path.join(output_dir, "train_results.pickle"),"wb") as results_file:
+        pickle.dump(history.history, results_file)
     
     return history
