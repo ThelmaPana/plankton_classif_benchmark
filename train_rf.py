@@ -24,6 +24,8 @@ min_samples_leaf = [2,5,10]
 ## Number of trees
 tree_nb_go = True
 max_tree_nb = 500
+tree_nb = 200
+
 
 ##################################################################################
 
@@ -43,4 +45,10 @@ if gridsearch_go:
 ## Find appropriate number of trees
 if tree_nb_go:
     pred_res = model_rf.explore_tree_nb(df_train, df_valid, max_tree_nb, min_samples_leaf, max_features)
-    ggplot.draw(ggplot(pred_res) + geom_path(aes(trees, accur)))
+    ggplot.draw(ggplot(pred_res) + geom_path(aes(x='trees', y='accur')))
+
+    
+## Fit the RF
+# 200 trees is enough
+rf = model_rf.train_rf(df_train, tree_nb, max_features, min_samples_leaf)
+

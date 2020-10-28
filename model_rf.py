@@ -107,3 +107,37 @@ def explore_tree_nb(d_train, d_valid, max_tree_nb, min_samples_leaf, max_feature
     pred_res = pd.DataFrame.from_dict({'trees': trees, 'accur': accur})
     
     return pred_res
+
+
+def train_rf(df, tree_nb, max_features, min_samples_leaf):
+    """
+    Fit a random forest model on data.
+    
+    Args:
+        df (DataFrame): data to use for training
+        tree_nb (int): number of trees for the RF model
+        max_features (int): number of variables per node
+        min_samples_leaf (int): min number of objects in leaf
+    
+    Returns:
+        pred_res (DataFrame): results of accuracy per value of tree numbers
+        
+    """
+    # Split data and labels
+    y_train = df.pop('classif_id')
+    X_train = df
+    
+    # Initiate RF model
+    rf = RandomForestClassifier(
+        n_estimators=tree_nb, 
+        criterion='gini', 
+        min_samples_split=2, 
+        min_samples_leaf=min_samples_leaf, 
+        max_features=max_features, 
+        warm_start=True,
+    )
+    
+    # Fit the RF model
+    rf = rf.fit(X=X_train, y=y_train)
+    
+    return rf
