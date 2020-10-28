@@ -13,7 +13,7 @@ if not os.path.exists(output_dir):
 random_state = 42
 
 ## Data
-instrument = "isiis"
+instrument = 'isiis'
 data_dir = os.path.join('data', instrument)
 
 ## Gridsearch
@@ -31,9 +31,7 @@ df_train, df_valid, df_test = datasets.read_data_rf(
 
 ## Grid search
 if gridsearch_go:
-    cv_res = model_rf.gridsearch_rf(df_train, max_features, min_samples_leaf)
-    (ggplot(cv_res) +
-      geom_point(aes(x="max_features", y="mean_valid_accur", colour="min_samples_leaf")))
-
-
+    cv_res, max_features,  min_samples_leaf= model_rf.gridsearch_rf(df_train, max_features, min_samples_leaf)
+    ggplot.draw(ggplot(cv_res) +
+      geom_point(aes(x='max_features', y='mean_valid_accur', colour='min_samples_leaf')))
 

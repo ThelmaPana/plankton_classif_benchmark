@@ -14,6 +14,8 @@ def gridsearch_rf(df, max_features, min_samples_leaf):
     
     Returns:
         cv_res (DataFrame): results of grid search
+        best_max_features (int): best value for number of variables per node
+        best_min_samples_leaf (int): best value for min number of objects in leaf
     """
     
     # Shuffle data
@@ -47,6 +49,9 @@ def gridsearch_rf(df, max_features, min_samples_leaf):
     # Convert to datfarame
     cv_res = pd.DataFrame(cv_res)
     
+    # Extract best values for max_features and min_samples_leaf
+    best_max_features = cv_res.nlargest(1, 'mean_valid_accur').reset_index(drop=True).loc[0, 'max_features']
+    best_min_samples_leaf = cv_res.nlargest(1, 'mean_valid_accur').reset_index(drop=True).loc[0, 'min_samples_leaf']
 
     
-    return cv_res
+    return cv_res, best_max_features, best_min_samples_leaf
