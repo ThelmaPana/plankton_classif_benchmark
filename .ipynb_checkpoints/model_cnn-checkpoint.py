@@ -148,3 +148,24 @@ def train_cnn(model, train_batches, valid_batches, batch_size, epochs, output_di
         pickle.dump(history.history, results_file)
     
     return history
+
+def evaluate_cnn(model, batches, batch_size):
+    """
+    Evaluate a CNN model. 
+    
+    Args:
+        model (tensorflow.python.keras.engine.sequential.Sequential): CNN model to eavluate
+        batches (datasets.DataGenerator): batches of data to evaluate the model on
+        batch_size (int): size of batches
+
+    
+    Returns:
+        results (list): list of loss and accuracy
+        
+    """
+    results = model.evaluate(
+        batches, 
+        batch_size=batch_size,
+    )
+    print("test loss, test accuracy:", results)
+    return results

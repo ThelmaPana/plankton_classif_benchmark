@@ -37,7 +37,7 @@ classif_layer_dropout = 0.2
 train_layers = 'all'
 
 # Training
-epochs = 5
+epochs = 10
 
 # Compilation
 lr_method = 'decay' # or 'constant'
@@ -87,7 +87,7 @@ for image_batch, label_batch in train_batches:
 
 # glimpse at batch
 if glimpse:
-    datasets.batch_glimpse(train_batches, classes)
+    datasets.batch_glimpse(test_batches, classes)
 
     
 
@@ -116,5 +116,5 @@ my_cnn = model_cnn.compile_cnn(
 history = model_cnn.train_cnn(my_cnn, train_batches, valid_batches, batch_size, epochs, output_dir)
     
 
-
-
+## Evaluate CNN    
+results = model_cnn.evaluate_cnn(my_cnn, test_batches, batch_size)
