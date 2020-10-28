@@ -5,6 +5,7 @@ from tensorflow.keras import layers, optimizers, losses, callbacks #, applicatio
 import tensorflow_addons as tfa
 import os
 import pickle
+import numpy as np
 
 
 
@@ -169,3 +170,42 @@ def evaluate_cnn(model, batches, batch_size):
     )
     print("test loss, test accuracy:", results)
     return results
+
+def predict_batches(model, batches, classes, output_dir):
+    """
+    Predict batches with a CNN model.
+    
+    Args:
+        model (tensorflow.python.keras.engine.sequential.Sequential): CNN model to eavluate
+        batches (datasets.DataGenerator): batches of data to predict
+        classes (array): classes to predict
+        output_dir (str): directory where to save prediction results
+
+    
+    Returns:
+        true_classes (array): true classes of objects
+        predicted_classes (array): classes of objects as predicted by the CNN
+        
+    """
+    # Initiate empty lists for predicted and true labels
+    predicted_batches = []
+    true_batches = []
+    # Loop over test batches
+    for image_batch, label_batch in batches:
+        # Predict images of batch
+        predicted_batches.extend(model.predict(image_batch))
+        # Extract true labels of batch
+        true_batches.extend(label_batch)
+    
+    # Convert to class names
+    predicted_classes = classes[np.argmax(predicted_batches, axis=1)]
+    true_classes = classes[np.argmax(true_batches, axis=1)]
+    
+    # Write true and predicted classes to test file
+    with open(os.path.join(output_dir, "test_results.pickle"),"wb") as test_file:
+        pickle.dump({'true_classes' : true_classes,
+                     'predicted_classes' : predicted_classes,
+                     'classes' : classes},
+                    test_file)
+        
+    return true_classes, predicted_classes
