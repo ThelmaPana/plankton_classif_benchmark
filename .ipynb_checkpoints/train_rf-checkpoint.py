@@ -61,8 +61,18 @@ if gridsearch_go:
 
 ## Fit the RF of training data
 # 200 trees is enough
-rf = model_rf.train_rf(df_train, n_estimators, max_features, min_samples_leaf, n_jobs, random_state)
+rf = model_rf.train_rf(
+    df=df_train, 
+    n_estimators=n_estimators, 
+    max_features=max_features, 
+    min_samples_leaf=min_samples_leaf, 
+    n_jobs=n_jobs, 
+    random_state=random_state
+)
 
 
 ## Evaluate the RF on test data
-test_accuracy = model_rf.evaluate_rf(rf, df_test)
+test_accuracy = model_rf.evaluate_rf(
+    rf_model=rf, 
+    df=df_test
+)
