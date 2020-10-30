@@ -56,7 +56,7 @@ loss = 'sfce' # or 'sfce'
 
 ## Read data for CNN
 df_train, df_valid, df_test = datasets.read_data_cnn(
-    path = os.path.join(data_dir, 'isiis_data.csv'),
+    path = os.path.join(data_dir, '_'.join([instrument, 'data.csv'])),
     random_state=random_state)
 
 #df_train.groupby('classif_id').size()

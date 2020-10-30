@@ -35,7 +35,7 @@ n_estimators_try = [100,200,350,500]
 
 ## Read data for RF
 df_train, df_valid, df_test = datasets.read_data_rf(
-    path = os.path.join(data_dir, 'isiis_data.csv'),
+    path = os.path.join(data_dir, '_'.join([instrument, 'data.csv'])),
     random_state=random_state)
 
 
