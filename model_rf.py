@@ -124,3 +124,30 @@ def train_rf(df, n_estimators, max_features, min_samples_leaf):
     rf = rf.fit(X=X_train, y=y_train)
     
     return rf
+
+
+def evaluate_rf(rf_model, df):
+    """
+    Evaluate a random forest model.
+    
+    Args:
+        rf_model (RandomForestClassifier): random forest model to evaluate
+        df (DataFrame): data to use for evaluation
+    
+    Returns:
+        accuracy (float): accuracy value
+    """
+    
+    # Shuffle data
+    df = df.sample(frac=1).reset_index(drop=True)
+    
+    # Split data and labels
+    y = df['classif_id']
+    X = df.drop('classif_id', axis=1)
+    
+    # Compute accuracy between true labels and predicted labels
+    accuracy = accuracy_score(y, rf_model.predict(X))
+    print(f'Test accuracy = {accuracy}')
+    return(accuracy)
+    
+    
