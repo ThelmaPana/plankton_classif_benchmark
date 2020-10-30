@@ -61,11 +61,4 @@ rf = model_rf.train_rf(df_train, n_estimators, max_features, min_samples_leaf)
 
 
 ## Evaluate the RF on test data
-df = df_test.copy()
-y_test = df.pop('classif_id')
-X_test = df
-
-test_accuracy = accuracy_score(y_test, rf.predict(X_test))
-print(f'Test accuracy = {test_accuracy}')
-
 test_accuracy = model_rf.evaluate_rf(rf, df_test)
