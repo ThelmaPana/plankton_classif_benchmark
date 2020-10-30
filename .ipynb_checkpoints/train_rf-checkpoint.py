@@ -39,7 +39,8 @@ if gridsearch_go:
         df_valid, 
         max_features_try=max_features_try, 
         min_samples_leaf_try=min_samples_leaf_try, 
-        n_estimators_try=n_estimators_try
+        n_estimators_try=n_estimators_try,
+        output_dir=output_dir
     )
     
     # Plot results

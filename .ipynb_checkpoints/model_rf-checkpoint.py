@@ -1,11 +1,13 @@
 import pandas as pd
 import numpy as np
 import itertools as it
+import os
+import pickle
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score
 
 
-def gridsearch_rf(df1, df2, max_features_try, min_samples_leaf_try, n_estimators_try):
+def gridsearch_rf(df1, df2, max_features_try, min_samples_leaf_try, n_estimators_try, output_dir):
     """
     Do a grid search to find best hyperparameters for random forest model, including number of estimators.
     
@@ -15,6 +17,7 @@ def gridsearch_rf(df1, df2, max_features_try, min_samples_leaf_try, n_estimators
         max_features (list): number of variables per node; default sqrt(nb of vars)
         min_samples_leaf (list): min number of objects in leaf; default for classif = 5
         n_estimators (list): number of estimators (usually between 100 and 500)
+        output_dir (str): directory where to save gridsearch results
     
     Returns:
         cv_res (DataFrame): results of grid search
@@ -81,7 +84,10 @@ def gridsearch_rf(df1, df2, max_features_try, min_samples_leaf_try, n_estimators
             results['min_samples_leaf'].append(min_samples_leaf)
             results['valid_accuracy'].append(valid_accuracy)
 
-    
+    # Write training history 
+    with open(os.path.join(output_dir, 'train_results.pickle'),'wb') as results_file:
+        pickle.dump(results, results_file)
+        
     # Convert to datfarame
     results = pd.DataFrame(results)
     
