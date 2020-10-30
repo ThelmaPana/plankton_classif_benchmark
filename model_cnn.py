@@ -6,6 +6,7 @@ import tensorflow_addons as tfa
 import os
 import pickle
 import numpy as np
+from sklearn.metrics import accuracy_score
 
 
 
@@ -150,30 +151,10 @@ def train_cnn(model, train_batches, valid_batches, batch_size, epochs, output_di
     
     return history
 
-def evaluate_cnn(model, batches, batch_size):
-    """
-    Evaluate a CNN model. 
-    
-    Args:
-        model (tensorflow.python.keras.engine.sequential.Sequential): CNN model to eavluate
-        batches (datasets.DataGenerator): batches of data to evaluate the model on
-        batch_size (int): size of batches
 
-    
-    Returns:
-        results (list): list of loss and accuracy
-        
+def predict_evaluate_cnn(model, batches, classes, output_dir):
     """
-    results = model.evaluate(
-        batches, 
-        batch_size=batch_size,
-    )
-    print("test loss, test accuracy:", results)
-    return results
-
-def predict_batches(model, batches, classes, output_dir):
-    """
-    Predict batches with a CNN model.
+    Predict batches and evaluate a CNN model by computing accuracy and loss and writting predictions into a test file. 
     
     Args:
         model (tensorflow.python.keras.engine.sequential.Sequential): CNN model to eavluate
@@ -183,8 +164,8 @@ def predict_batches(model, batches, classes, output_dir):
 
     
     Returns:
-        true_classes (array): true classes of objects
-        predicted_classes (array): classes of objects as predicted by the CNN
+        accuracy (float) accuracy value for test data
+        loss (float): loss (categorical cross entropy) value for test data
         
     """
     # Initiate empty lists for predicted and true labels
@@ -202,10 +183,17 @@ def predict_batches(model, batches, classes, output_dir):
     true_classes = classes[np.argmax(true_batches, axis=1)]
     
     # Write true and predicted classes to test file
-    with open(os.path.join(output_dir, "test_results.pickle"),"wb") as test_file:
+    with open(os.path.join(output_dir, 'test_results.pickle'),'wb') as test_file:
         pickle.dump({'true_classes' : true_classes,
                      'predicted_classes' : predicted_classes,
                      'classes' : classes},
                     test_file)
-        
-    return true_classes, predicted_classes
+    
+    # Compute accuracy and loss from true labels and predicted labels
+    accuracy = accuracy_score(true_classes, predicted_classes)
+    cce = losses.CategoricalCrossentropy()
+    loss = cce(true_batches, predicted_batches).numpy()
+    print(f'Test accuracy = {accuracy}')
+    print(f'Test loss = {loss}')
+    
+    return accuracy, loss

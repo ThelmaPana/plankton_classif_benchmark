@@ -77,6 +77,7 @@ def gridsearch_rf(df1, df2, max_features_try, min_samples_leaf_try, n_estimators
             
             # Fit on training data
             rf.fit(X=X_train, y=y_train)
+            
             # Compute accuracy on validation data
             valid_accuracy = accuracy_score(y_valid, rf.predict(X_valid))
             
@@ -96,7 +97,6 @@ def gridsearch_rf(df1, df2, max_features_try, min_samples_leaf_try, n_estimators
     # Extract best parameters based on validation accuracy value
     best_params = results.nlargest(1, 'valid_accuracy').reset_index(drop=True).drop('valid_accuracy', axis=1)
     best_params = best_params.iloc[0].to_dict()
-
     
     return results, best_params
 
