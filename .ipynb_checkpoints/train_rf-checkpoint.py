@@ -42,7 +42,8 @@ if gridsearch_go:
         min_samples_leaf_try=min_samples_leaf_try, 
         n_estimators_try=n_estimators_try,
         output_dir=output_dir,
-        n_jobs=n_jobs
+        n_jobs=n_jobs,
+        random_state=random_state
     )
     
     # Plot results
@@ -60,7 +61,7 @@ if gridsearch_go:
 
 ## Fit the RF of training data
 # 200 trees is enough
-rf = model_rf.train_rf(df_train, n_estimators, max_features, min_samples_leaf, n_jobs)
+rf = model_rf.train_rf(df_train, n_estimators, max_features, min_samples_leaf, n_jobs, random_state)
 
 
 ## Evaluate the RF on test data
