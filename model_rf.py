@@ -31,11 +31,11 @@ def gridsearch_rf(df1, df2, max_features_try, min_samples_leaf_try, n_estimators
     df2 = df2.sample(frac=1).reset_index(drop=True)
     
     # Split data and labels
-    y_train = df1.pop('classif_id')
-    X_train = df1
+    y_train = df1['classif_id']
+    X_train = df1.drop('classif_id', axis=1)
     
-    y_valid = df2.pop('classif_id')
-    X_valid = df2
+    y_valid = df2['classif_id']
+    X_valid = df2.drop('classif_id', axis=1)
     
     # Build grid of hyperparameters to explore
     grid = {
