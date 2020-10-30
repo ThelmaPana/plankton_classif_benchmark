@@ -79,10 +79,3 @@ test_accuracy = model_rf.evaluate_rf(
 )
 
 
-## Predict test data
-df = df_test.copy()
-y = df['classif_id']
-X = df.drop('classif_id', axis=1)
-
-pred=rf.predict(X)
-
