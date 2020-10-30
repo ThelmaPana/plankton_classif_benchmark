@@ -1,16 +1,17 @@
 import pandas as pd
 import numpy as np
-from sklearn.model_selection import GridSearchCV
+from sklearn.model_selection import GridSearchCV, PredefinedSplit
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score
 
 
-def gridsearch_rf(df, max_features, min_samples_leaf):
+def gridsearch_rf(df1, df2, max_features, min_samples_leaf):
     """
     Do a grid search to find best hyperparameters for random forest model.
     
     Args:
-        df (DataFrame): data to use for grid search
+        df1 (DataFrame): training data to use to fit grid search
+        df2 (DataFrame): validation data to use to evaluate grid search        
         max_features (list): number of variables per node; default sqrt(nb of vars)
         min_samples_leaf (list): min number of objects in leaf; default for classif = 5
     
@@ -21,12 +22,26 @@ def gridsearch_rf(df, max_features, min_samples_leaf):
     """
     
     # Shuffle data
-    df = df.sample(frac=1).reset_index(drop=True)
+    df1 = df1.sample(frac=1).reset_index(drop=True)
+    df2 = df2.sample(frac=1).reset_index(drop=True)
     
     # Split data and labels
-    y = df.pop('classif_id')
-    X = df
-
+    y_train = df1.pop('classif_id')
+    X_train = df1
+    
+    y_valid = df2.pop('classif_id')
+    X_valid = df2
+    
+    # Concat training and validation data
+    X = pd.concat([X_train, X_valid]).reset_index(drop=True)
+    y = pd.concat([y_train, y_valid]).reset_index(drop=True)
+    
+    # Set training and testing indices
+    train_indices = np.full((len(y_train),), -1, dtype=int)
+    test_indices  = np.full((len(y_valid),),  0, dtype=int)
+    test_fold = np.append(train_indices, test_indices)
+    ps = PredefinedSplit(test_fold)
+    
     # Initiate a RF model
     rf = RandomForestClassifier(n_estimators=200, criterion='gini', min_samples_split=2)
     # NB: set a small min_sample_split to make sure it is min_sample_leaf which determines the depth of the tree.
@@ -38,7 +53,7 @@ def gridsearch_rf(df, max_features, min_samples_leaf):
     }
     
     # Do grid search
-    mcv = GridSearchCV(rf, param_grid=grid, cv=4, n_jobs=12, scoring='accuracy')
+    mcv = GridSearchCV(rf, param_grid=grid, cv=ps, n_jobs=12, scoring='accuracy')
     mcv.fit(X=X, y=y)
     
     # Extract results
@@ -46,8 +61,8 @@ def gridsearch_rf(df, max_features, min_samples_leaf):
         'max_features':     mcv.cv_results_['param_max_features'], 
         'min_samples_leaf': mcv.cv_results_['param_min_samples_leaf'],
         'mean_valid_accur': mcv.cv_results_['mean_test_score'],
-        'std_valid_accur':  mcv.cv_results_['std_test_score'],
     }
+    
     # Convert to datfarame
     cv_res = pd.DataFrame(cv_res)
     
