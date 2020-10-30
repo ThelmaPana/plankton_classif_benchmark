@@ -140,7 +140,7 @@ def train_rf(df, n_estimators, max_features, min_samples_leaf, n_jobs, random_st
     return rf
 
 
-def evaluate_rf(rf_model, df, output_dir):
+def predict_evaluate_rf(rf_model, df, output_dir):
     """
     Evaluate a random forest model.
     
