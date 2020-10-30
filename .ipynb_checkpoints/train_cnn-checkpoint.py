@@ -1,4 +1,5 @@
 import os
+import glob
 import lycon
 import cv2
 import pandas as pd
@@ -10,9 +11,15 @@ import tensorflow as tf
 
 #################################### Settings ####################################
 output_dir = 'cnn_output'
-# Check if output_dir exists, if not create it
+# Check if output directory exists, if not create it
 if not os.path.exists(output_dir):
     os.mkdir(output_dir)
+    
+delete_previous = True # whether to delete files in output directory
+if delete_previous:
+    files = glob.glob(os.path.join(output_dir, '*'))
+    for f in files:
+        os.remove(f)
 
 ## Data
 instrument = "isiis"

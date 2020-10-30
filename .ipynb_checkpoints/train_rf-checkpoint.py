@@ -2,14 +2,20 @@ import os
 import datasets
 import model_rf
 from plotnine import *
-
 from sklearn.metrics import accuracy_score
 
 #################################### Settings ####################################
 output_dir = 'rf_output'
-# Check if output_dir exists, if not create it
+# Check if output_directory exists, if not create it
 if not os.path.exists(output_dir):
     os.mkdir(output_dir)
+    
+delete_previous = True # whether to delete files in output directory
+if delete_previous:
+    files = glob.glob(os.path.join(output_dir, '*'))
+    for f in files:
+        os.remove(f)
+        
 random_state = 42
 
 ## Data
