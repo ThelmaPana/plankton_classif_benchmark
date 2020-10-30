@@ -176,6 +176,7 @@ def read_data_rf(path, random_state=None):
     
     Args:
         path (str): path to the file
+        random_state (int or RandomState): controls both the randomness of the bootstrapping and features sampling; default=None
     
     Returns:
         df_train (DataFrame): training data containing object features and classif_id
