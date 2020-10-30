@@ -104,7 +104,7 @@ def train_rf(df, n_estimators, max_features, min_samples_leaf):
         min_samples_leaf (int): min number of objects in leaf
     
     Returns:
-        pred_res (DataFrame): results of accuracy per value of tree numbers
+        rf (RandomForestClassifier): fitted random forest model
         
     """
     # Split data and labels
