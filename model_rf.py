@@ -117,6 +117,10 @@ def train_rf(df, n_estimators, max_features, min_samples_leaf, n_jobs, random_st
         rf (RandomForestClassifier): fitted random forest model
         
     """
+    
+    # Shuffle data
+    df = df.sample(frac=1).reset_index(drop=True)
+    
     # Split data and labels
     y_train = df['classif_id']
     X_train = df.drop('classif_id', axis=1)
