@@ -74,5 +74,15 @@ rf = model_rf.train_rf(
 ## Evaluate the RF on test data
 test_accuracy = model_rf.evaluate_rf(
     rf_model=rf, 
-    df=df_test
+    df=df_test,
+    output_dir = output_dir
 )
+
+
+## Predict test data
+df = df_test.copy()
+y = df['classif_id']
+X = df.drop('classif_id', axis=1)
+
+pred=rf.predict(X)
+

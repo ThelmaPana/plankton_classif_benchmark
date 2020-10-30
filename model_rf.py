@@ -136,13 +136,14 @@ def train_rf(df, n_estimators, max_features, min_samples_leaf, n_jobs, random_st
     return rf
 
 
-def evaluate_rf(rf_model, df):
+def evaluate_rf(rf_model, df, output_dir):
     """
     Evaluate a random forest model.
     
     Args:
         rf_model (RandomForestClassifier): random forest model to evaluate
         df (DataFrame): data to use for evaluation
+        output_dir (str): directory where to save prediction results
     
     Returns:
         accuracy (float): accuracy value
@@ -155,9 +156,25 @@ def evaluate_rf(rf_model, df):
     y = df['classif_id']
     X = df.drop('classif_id', axis=1)
     
+    # Make a list of classes
+    classes = list(set(y))
+    classes.sort()
+    classes = np.array(classes)
+    
+    # Predict test data
+    y_pred = rf_model.predict(X)
+    
+    # Write true and predicted classes to test file
+    with open(os.path.join(output_dir, 'test_results.pickle'),'wb') as test_file:
+        pickle.dump({'true_classes' : y,
+                     'predicted_classes' : y_pred,
+                     'classes' : classes},
+                    test_file)
+    
     # Compute accuracy between true labels and predicted labels
-    accuracy = accuracy_score(y, rf_model.predict(X))
+    accuracy = accuracy_score(y, y_pred)
     print(f'Test accuracy = {accuracy}')
     return(accuracy)
     
+
     
