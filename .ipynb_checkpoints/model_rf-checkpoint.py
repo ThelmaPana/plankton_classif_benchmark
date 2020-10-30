@@ -7,7 +7,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score
 
 
-def gridsearch_rf(df1, df2, max_features_try, min_samples_leaf_try, n_estimators_try, output_dir):
+def gridsearch_rf(df1, df2, max_features_try, min_samples_leaf_try, n_estimators_try, output_dir, n_jobs):
     """
     Do a grid search to find best hyperparameters for random forest model, including number of estimators.
     
@@ -18,6 +18,7 @@ def gridsearch_rf(df1, df2, max_features_try, min_samples_leaf_try, n_estimators
         min_samples_leaf (list): min number of objects in leaf; default for classif = 5
         n_estimators (list): number of estimators (usually between 100 and 500)
         output_dir (str): directory where to save gridsearch results
+        n_jobs (int): number of cores to use 
     
     Returns:
         cv_res (DataFrame): results of grid search
@@ -99,7 +100,7 @@ def gridsearch_rf(df1, df2, max_features_try, min_samples_leaf_try, n_estimators
     return results, best_params
 
 
-def train_rf(df, n_estimators, max_features, min_samples_leaf):
+def train_rf(df, n_estimators, max_features, min_samples_leaf, n_jobs):
     """
     Fit a random forest model on data.
     
@@ -108,6 +109,7 @@ def train_rf(df, n_estimators, max_features, min_samples_leaf):
         tree_nb (int): number of trees for the RF model
         max_features (int): number of variables per node
         min_samples_leaf (int): min number of objects in leaf
+        n_jobs (int): number of cores to use 
     
     Returns:
         rf (RandomForestClassifier): fitted random forest model

@@ -16,7 +16,8 @@ random_state = 42
 instrument = 'isiis'
 data_dir = os.path.join('data', instrument)
 
-## Gridsearch
+## RF model
+n_jobs = 6 
 gridsearch_go = True
 max_features_try = [4,6,8,10]
 min_samples_leaf_try = [2,5,10]
@@ -40,7 +41,8 @@ if gridsearch_go:
         max_features_try=max_features_try, 
         min_samples_leaf_try=min_samples_leaf_try, 
         n_estimators_try=n_estimators_try,
-        output_dir=output_dir
+        output_dir=output_dir,
+        n_jobs=n_jobs
     )
     
     # Plot results
@@ -58,7 +60,7 @@ if gridsearch_go:
 
 ## Fit the RF of training data
 # 200 trees is enough
-rf = model_rf.train_rf(df_train, n_estimators, max_features, min_samples_leaf)
+rf = model_rf.train_rf(df_train, n_estimators, max_features, min_samples_leaf, n_jobs)
 
 
 ## Evaluate the RF on test data
