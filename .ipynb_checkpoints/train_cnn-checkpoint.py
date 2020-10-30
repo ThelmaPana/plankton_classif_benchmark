@@ -10,17 +10,6 @@ import matplotlib.pyplot as plt
 import tensorflow as tf
 
 #################################### Settings ####################################
-output_dir = 'cnn_output'
-# Check if output directory exists, if not create it
-if not os.path.exists(output_dir):
-    os.mkdir(output_dir)
-    
-delete_previous = True # whether to delete files in output directory
-if delete_previous:
-    files = glob.glob(os.path.join(output_dir, '*'))
-    for f in files:
-        os.remove(f)
-
 ## Data
 instrument = "isiis"
 data_dir = os.path.join('data', instrument)
@@ -51,6 +40,18 @@ lr_method = 'decay' # or 'constant'
 initial_lr = 0.001
 decay_rate = 0.97
 loss = 'sfce' # or 'sfce'
+
+## Outputs
+output_dir = '_'.join(['output_cnn', instrument])
+# Check if output directory exists, if not create it
+if not os.path.exists(output_dir):
+    os.mkdir(output_dir)
+    
+delete_previous = True # whether to delete files in output directory
+if delete_previous:
+    files = glob.glob(os.path.join(output_dir, '*'))
+    for f in files:
+        os.remove(f)
 
 ##################################################################################
 

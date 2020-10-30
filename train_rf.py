@@ -5,8 +5,21 @@ import model_rf
 from plotnine import *
 from sklearn.metrics import accuracy_score
 
-#################################### Settings ####################################
-output_dir = 'rf_output'
+#################################### Settings ####################################       
+## Data
+instrument = 'isiis'
+data_dir = os.path.join('data', instrument)
+random_state = 42
+
+## RF model
+n_jobs = 6 
+gridsearch_go = True
+max_features_try = [4,6,8,10]
+min_samples_leaf_try = [2,5,10]
+n_estimators_try = [100,200,350,500]
+
+## Outputs
+output_dir = '_'.join(['output_rf', instrument])
 # Check if output_directory exists, if not create it
 if not os.path.exists(output_dir):
     os.mkdir(output_dir)
@@ -17,20 +30,6 @@ if delete_previous:
     for f in files:
         os.remove(f)
         
-random_state = 42
-
-## Data
-instrument = 'isiis'
-data_dir = os.path.join('data', instrument)
-
-## RF model
-n_jobs = 6 
-gridsearch_go = True
-max_features_try = [4,6,8,10]
-min_samples_leaf_try = [2,5,10]
-n_estimators_try = [100,200,350,500]
-
-
 ##################################################################################
 
 ## Read data for RF
