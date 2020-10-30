@@ -38,6 +38,11 @@ df_train, df_valid, df_test = datasets.read_data_rf(
     path = os.path.join(data_dir, '_'.join([instrument, 'data.csv'])),
     random_state=random_state)
 
+# Write train, valid and test splits to output directory for future inspection
+df_train.to_csv(os.path.join(output_dir, 'df_train.csv'), index=False)
+df_valid.to_csv(os.path.join(output_dir, 'df_valid.csv'), index=False)
+df_test.to_csv(os.path.join(output_dir, 'df_test.csv'), index=False)
+
 
 ## Grid search
 # Do grid serach
