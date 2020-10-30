@@ -108,8 +108,8 @@ def train_rf(df, n_estimators, max_features, min_samples_leaf):
         
     """
     # Split data and labels
-    y_train = df.pop('classif_id')
-    X_train = df
+    y_train = df['classif_id']
+    X_train = df.drop('classif_id', axis=1)
     
     # Initiate RF model
     rf = RandomForestClassifier(
