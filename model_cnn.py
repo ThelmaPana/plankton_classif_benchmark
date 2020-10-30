@@ -7,6 +7,7 @@ import os
 import pickle
 import numpy as np
 from sklearn.metrics import accuracy_score
+import glob
 
 
 
@@ -168,9 +169,16 @@ def predict_evaluate_cnn(model, batches, classes, output_dir):
         loss (float): loss (categorical cross entropy) value for test data
         
     """
+    
+    # Load last saved weights to CNN model
+    saved_weights = glob.glob(os.path.join(output_dir, "*.hdf5"))
+    saved_weights.sort()
+    model.load_weights(saved_weights[-1])
+    
     # Initiate empty lists for predicted and true labels
     predicted_batches = []
     true_batches = []
+    
     # Loop over test batches
     for image_batch, label_batch in batches:
         # Predict images of batch
