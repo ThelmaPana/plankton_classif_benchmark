@@ -60,15 +60,10 @@ When you run `train_cnn.py` or `train_rf.py`, an output directory is created and
 
 ## TODOs
 
-[ ] fill the .yaml settings file
-
-[ ] check values for settings
-
-[ ] limit number of objects from each class in training set
-
-[ ] implement the use of class weights for CNN models
-
-[ ] train models with data from other instruments
-
-[ ] aggregate all comparisons in one file
+- [ ] fill the .yaml settings file
+- [ ] check values for settings
+- [ ] limit number of objects from each class in training set
+- [ ] implement the use of class weights for CNN models
+- [ ] train models with data from other instruments
+- [ ] aggregate all comparisons in one file
 
