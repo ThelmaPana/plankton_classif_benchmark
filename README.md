@@ -59,9 +59,16 @@ For each set of parameters, model is trained on training data and evaluated on v
 When you run `train_cnn.py` or `train_rf.py`, an output directory is created and results are stored in this directory. Use the notebooks `inspect_results_cnn.ipynb`and `inspect_results_rf.ipynb` to explore the results. 
 
 ## TODOs
+
 [ ] fill the .yaml settings file
+
 [ ] check values for settings
+
 [ ] limit number of objects from each class in training set
+
 [ ] implement the use of class weights for CNN models
+
 [ ] train models with data from other instruments
+
 [ ] aggregate all comparisons in one file
+
