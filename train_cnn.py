@@ -18,6 +18,7 @@ cnn_settings = read_settings.check_cnn()
 # Input data
 instrument = global_settings['input_data']['instrument']
 data_dir = os.path.join('data', instrument)
+n_max = global_settings['input_data']['n_max']
 
 # Random state
 random_state = global_settings['random_state']
@@ -53,7 +54,8 @@ epochs = cnn_settings['training']['epochs']
 
 ## Read data for CNN
 df_train, df_valid, df_test = datasets.read_data_cnn(
-    path = os.path.join(data_dir, '_'.join([instrument, 'data.csv'])),
+    path=os.path.join(data_dir, '_'.join([instrument, 'data.csv'])),
+    n_max=n_max,
     random_state=random_state)
 
 # Write train, valid and test splits to output directory for future inspection

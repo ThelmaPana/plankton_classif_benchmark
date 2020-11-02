@@ -3,7 +3,7 @@
 # Global settings
 global:
     # Reproducibility
-    random_state: null # 'null' for no reproducibility, any integer for reproducibility.
+    random_state: 42 # 'null' for no reproducibility, any integer for reproducibility.
     
     # Delete previous training outputs
     delete_previous: true # if 'true', delete previous training outputs for the trained model and instrument.
@@ -12,6 +12,7 @@ global:
     input_data:
       instrument: 'isiis' # name of the instrument. 
       split: [70, 15, 15] # split for training / validation / test. Sum should equal 100.
+      n_max: 5000 # maximum number of objects in each class for training data
 
 # Random Forest
 rf:

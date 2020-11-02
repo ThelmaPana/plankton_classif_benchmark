@@ -37,6 +37,11 @@ def check_global():
     assert sum(settings['input_data']['split']) == 100, \
         'global > input_data > split should sum to 100'
     
+    # n_max
+    assert isinstance(settings['input_data']['n_max'], int) and \
+        (settings['input_data']['n_max'] > 0), \
+        'global > input_data > n_max should be a positive integer'
+    
     return settings
 
     

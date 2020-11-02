@@ -11,12 +11,13 @@ import matplotlib.pyplot as plt
 from imgaug import augmenters as iaa
 
 
-def read_data_cnn(path, random_state=None):
+def read_data_cnn(path, n_max=None, random_state=None):
     """
     Read a csv file containing data to train the cnn
     
     Args:
         path (str): path to the file
+        n_max (NoneType or int): maximum number of objects per class for training set
     
     Returns:
         df_train (DataFrame): training data containing path to image and classif_id
@@ -51,6 +52,10 @@ def read_data_cnn(path, random_state=None):
     df_test = X_test.copy()
     df_test['classif_id'] = y_test
     df_test = df_test.sort_values('classif_id', axis=0).reset_index(drop=True)
+    
+    # Limit number of objects per class for training set
+    if n_max:
+        df_train = df_train.groupby('classif_id').apply(lambda x: x.sample(min(n_max,len(x)), random_state=random_state)).reset_index(drop=True)
   
     return df_train, df_val, df_test
 
@@ -189,12 +194,13 @@ def batch_glimpse(batches, classes):
     pass
 
 
-def read_data_rf(path, random_state=None):
+def read_data_rf(path, n_max=None, random_state=None):
     """
     Read a csv file containing data to train the RandomForest and scale features between 0 and 1. 
     
     Args:
         path (str): path to the file
+        n_max (NoneType or int): maximum number of objects per class for training set
         random_state (int or RandomState): controls both the randomness of the bootstrapping and features sampling; default=None
     
     Returns:
@@ -252,6 +258,10 @@ def read_data_rf(path, random_state=None):
     df_test = X_test_scaled.copy()
     df_test['classif_id'] = y_test
     df_test = df_test.sort_values('classif_id', axis=0).reset_index(drop=True)
+    
+    # Limit number of objects per class for training set
+    if n_max:
+        df_train = df_train.groupby('classif_id').apply(lambda x: x.sample(min(n_max,len(x)), random_state=random_state)).reset_index(drop=True)
      
     return df_train, df_val, df_test
 
