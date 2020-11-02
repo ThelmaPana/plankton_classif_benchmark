@@ -57,7 +57,7 @@ def read_data_cnn(path, random_state=None):
 ## Define a data generator 
 class DataGenerator(utils.Sequence):
     'Generates data for Keras'
-    def __init__(self, df, data_dir, batch_size=32, image_dimensions = (224, 224, 3), shuffle=False, augment=False, px_del = 0, preserve_size=False):
+    def __init__(self, df, data_dir, batch_size=32, image_dimensions = (224, 224, 3), shuffle=True, augment=False, px_del = 0, preserve_size=False):
         self.df               = df                  # dataframe with path to images and classif_id
         self.data_dir         = data_dir            # directory containing data
         self.dim              = image_dimensions    # image dimensions

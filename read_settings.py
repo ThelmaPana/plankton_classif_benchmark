@@ -103,8 +103,8 @@ def check_cnn():
         (settings['data']['batch_size'] > 0), \
         'cnn > data > batch_size should be a positive integer'
     assert isinstance(settings['data']['px_del'], int) and \
-        (settings['data']['px_del'] > 0), \
-        'cnn > data > px_del should be a positive integer'
+        (settings['data']['px_del'] >= 0), \
+        'cnn > data > px_del should be zero or a positive integer'
     assert isinstance(settings['data']['preserve_size'], bool), \
         'cnn > data > preserve_size should be a boolean'
     assert isinstance(settings['data']['augment'], bool), \

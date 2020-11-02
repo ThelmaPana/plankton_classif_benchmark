@@ -11,48 +11,43 @@ import matplotlib.pyplot as plt
 import tensorflow as tf
 
 #################################### Settings ####################################
-## Data
-instrument = "isiis"
+## Read settings
+global_settings = read_settings.check_global()
+cnn_settings = read_settings.check_cnn()
+
+# Input data
+instrument = global_settings['input_data']['instrument']
 data_dir = os.path.join('data', instrument)
-random_state = 42
-batch_size = 32
-image_dimensions = (224, 224, 3)
-shuffle=True
-#augment=False #TODO
-px_del = 0
-preserve_size=False
 
-glimpse = False
+# Random state
+random_state = global_settings['random_state']
 
-## CNN model
-# architecture
-fc_layers_nb = 2
-fc_layers_size = 1280
-fc_layers_dropout = 0.4
-classif_layer_size = 22
-classif_layer_dropout = 0.2
-train_layers = 'all'
-
-# Training
-epochs = 10
-
-# Compilation
-lr_method = 'decay' # or 'constant'
-initial_lr = 0.001
-decay_rate = 0.97
-loss = 'sfce' # or 'sfce'
-
-## Outputs
+# Output
 output_dir = '_'.join(['output_cnn', instrument])
-# Check if output directory exists, if not create it
-if not os.path.exists(output_dir):
-    os.mkdir(output_dir)
-    
-delete_previous = True # whether to delete files in output directory
-if delete_previous:
+if global_settings['delete_previous']:
     files = glob.glob(os.path.join(output_dir, '*'))
     for f in files:
         os.remove(f)
+
+# CNN settings
+batch_size    = cnn_settings['data']['batch_size']
+px_del        = cnn_settings['data']['px_del']
+preserve_size = cnn_settings['data']['preserve_size']
+augment       = cnn_settings['data']['augment']
+use_weights   = cnn_settings['data']['use_weights']
+
+fc_layers_nb          = cnn_settings['architecture']['fc_layers_nb']
+fc_layers_size        = cnn_settings['architecture']['fc_layers_size']
+fc_layers_dropout     = cnn_settings['architecture']['fc_layers_dropout']
+classif_layer_dropout = cnn_settings['architecture']['classif_layer_dropout']
+train_fe              = cnn_settings['architecture']['train_fe']
+
+lr_method  = cnn_settings['compilation']['lr_method']
+initial_lr = cnn_settings['compilation']['initial_lr']
+decay_rate = cnn_settings['compilation']['decay_rate']
+loss       = cnn_settings['compilation']['loss']
+
+epochs = cnn_settings['training']['epochs']
 
 ##################################################################################
 
@@ -76,22 +71,19 @@ train_batches = datasets.DataGenerator(
     df=df_train,
     data_dir=data_dir,
     batch_size=batch_size, 
-    px_del=px_del, 
-    shuffle=shuffle)
+    px_del=px_del)
 
 valid_batches = datasets.DataGenerator(
     df=df_valid,
     data_dir=data_dir,
     batch_size=batch_size, 
-    px_del=px_del, 
-    shuffle=shuffle)
+    px_del=px_del)
 
 test_batches = datasets.DataGenerator(
     df=df_test,
     data_dir=data_dir,
     batch_size=batch_size, 
-    px_del=px_del, 
-    shuffle=shuffle)
+    px_del=px_del)
 
 for image_batch, label_batch in train_batches:
     print("Image batch shape: ", image_batch.shape)
@@ -99,8 +91,8 @@ for image_batch, label_batch in train_batches:
     break
 
 # glimpse at batch
-if glimpse:
-    datasets.batch_glimpse(test_batches, classes)
+#if glimpse:
+#    datasets.batch_glimpse(test_batches, classes)
 
     
 
