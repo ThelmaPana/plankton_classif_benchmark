@@ -60,8 +60,6 @@ When you run `train_cnn.py` or `train_rf.py`, an output directory is created and
 
 ## TODOs
 
-- [ ] limit number of objects from each class in training set
-- [ ] implement data augmentation for cnn training
 - [ ] train models with data from other instruments
 - [ ] aggregate all comparisons in one file
 
