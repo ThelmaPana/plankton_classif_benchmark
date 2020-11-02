@@ -102,7 +102,7 @@ def compile_cnn(model, initial_lr, steps_per_epoch, lr_method='constant', decay_
     return model
 
 
-def train_cnn(model, train_batches, valid_batches, batch_size, epochs, output_dir):
+def train_cnn(model, train_batches, valid_batches, batch_size, epochs, class_weights, output_dir):
     """
     Trains a CNN model. 
     
@@ -112,6 +112,7 @@ def train_cnn(model, train_batches, valid_batches, batch_size, epochs, output_di
         train_batches
         batch_size (int): size if batches
         epochs (int): number of epochs to train for
+        class_weight(dict): weights for classes
         output_dir (str): directory where to save model weights
 
     
@@ -142,8 +143,8 @@ def train_cnn(model, train_batches, valid_batches, batch_size, epochs, output_di
         steps_per_epoch=steps_per_epoch,
         validation_data=valid_batches,
         validation_steps=validation_steps,
-        callbacks=[cp_callback]
-        #class_weight=class_weights
+        callbacks=[cp_callback],
+        class_weight=class_weights
     )
     
     # Write training history 

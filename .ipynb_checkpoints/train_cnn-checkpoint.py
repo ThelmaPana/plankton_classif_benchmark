@@ -65,6 +65,17 @@ df_test.to_csv(os.path.join(output_dir, 'df_test.csv'), index=False)
 nb_classes = df_train['classif_id'].nunique()
 classes = df_train['classif_id'].unique()
 
+# Generate class weights
+class_weights = None
+if use_weights:
+    class_counts = df_train.groupby('classif_id').size()
+    count_max = 0
+    class_weights = {}
+    for idx in class_counts.items():
+        count_max = (idx[1], count_max) [idx[1] < count_max]
+    for i,idx in enumerate(class_counts.items()):
+        class_weights.update({i : count_max / idx[1]})
+
 
 ## Generate batches
 train_batches = datasets.DataGenerator(
@@ -98,7 +109,7 @@ my_cnn = model_cnn.create_cnn(
     classif_layer_dropout, 
     classif_layer_size=nb_classes, 
     train_layers='all', 
-    glimpse=False)
+    glimpse=True)
 
 ## Compile CNN
 my_cnn = model_cnn.compile_cnn(
@@ -111,7 +122,7 @@ my_cnn = model_cnn.compile_cnn(
 )
 
 ## Train CNN
-history = model_cnn.train_cnn(my_cnn, train_batches, valid_batches, batch_size, epochs, output_dir)
-    
+history = model_cnn.train_cnn(my_cnn, train_batches, valid_batches, batch_size, epochs, class_weights, output_dir)
+
 ## Predict test batches and evaluate CNN
 accuracy, loss = model_cnn.predict_evaluate_cnn(my_cnn, test_batches, classes, output_dir)
