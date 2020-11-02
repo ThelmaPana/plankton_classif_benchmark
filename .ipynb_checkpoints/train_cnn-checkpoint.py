@@ -123,7 +123,20 @@ my_cnn = model_cnn.compile_cnn(
 )
 
 ## Train CNN
-history = model_cnn.train_cnn(my_cnn, train_batches, valid_batches, batch_size, epochs, class_weights, output_dir)
+history = model_cnn.train_cnn(
+    model=my_cnn, 
+    train_batches=train_batches, 
+    valid_batches=valid_batches, 
+    batch_size=batch_size, 
+    epochs=epochs, 
+    class_weights=class_weights, 
+    output_dir=output_dir
+)
 
 ## Predict test batches and evaluate CNN
-accuracy, loss = model_cnn.predict_evaluate_cnn(my_cnn, test_batches, classes, output_dir)
+accuracy, loss = model_cnn.predict_evaluate_cnn(
+    model=my_cnn, 
+    test_batches=test_batches, 
+    classes=classes, 
+    output_dir=output_dir
+)
