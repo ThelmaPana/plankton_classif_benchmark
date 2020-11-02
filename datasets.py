@@ -11,12 +11,13 @@ import matplotlib.pyplot as plt
 from imgaug import augmenters as iaa
 
 
-def read_data_cnn(path, n_max=None, random_state=None):
+def read_data_cnn(path, split=[70, 15, 15], n_max=None, random_state=None):
     """
     Read a csv file containing data to train the cnn
     
     Args:
         path (str): path to the file
+        split (list): proportions for train, validation and test splits. Sum is 100.
         n_max (NoneType or int): maximum number of objects per class for training set
     
     Returns:
@@ -35,10 +36,12 @@ def read_data_cnn(path, n_max=None, random_state=None):
     # Make a stratified sampling by classif_id: 70% of data for training, 15% for validation and 15% for test
     y = df.pop('classif_id')
     X = df
-    # 70% of data for training
-    X_train, X_eval, y_train, y_eval = train_test_split(X, y, train_size=0.7, random_state=42, stratify=y)
-    # split remaining 30% to 50-50 for validation and testing
-    X_val, X_test, y_val, y_test = train_test_split(X_eval, y_eval, test_size=0.5, random_state=random_state, stratify=y_eval)
+    # split data for training
+    train_split = split[0]/100
+    X_train, X_eval, y_train, y_eval = train_test_split(X, y, train_size=train_split, random_state=random_state, stratify=y)
+    # split remaining data between validation and testing
+    test_size = split[2]/(100-split[0])
+    X_val, X_test, y_val, y_test = train_test_split(X_eval, y_eval, test_size=test_size, random_state=random_state, stratify=y_eval)
     
     # put back together X and y for training, validation and test dataframes
     df_train = X_train.copy()
@@ -194,12 +197,13 @@ def batch_glimpse(batches, classes):
     pass
 
 
-def read_data_rf(path, n_max=None, random_state=None):
+def read_data_rf(path, split = [70, 15, 15], n_max=None, random_state=None):
     """
     Read a csv file containing data to train the RandomForest and scale features between 0 and 1. 
     
     Args:
         path (str): path to the file
+        split (list): proportions for train, validation and test splits. Sum is 100.
         n_max (NoneType or int): maximum number of objects per class for training set
         random_state (int or RandomState): controls both the randomness of the bootstrapping and features sampling; default=None
     
@@ -216,13 +220,15 @@ def read_data_rf(path, n_max=None, random_state=None):
     # Delete columns 'path_to_img' and 'object_id'
     df = df.drop(columns=['object_id', 'path_to_img'])
     
-    # Make a stratified sampling by classif_id: 70% of data for training, 15% for validation and 15% for test
+    # Make a stratified sampling by classif_id
     y = df.pop('classif_id')
     X = df
-    # 70% of data for training
-    X_train, X_eval, y_train, y_eval = train_test_split(X, y, train_size=0.7, random_state=42, stratify=y)
-    # split remaining 30% to 50-50 for validation and testing
-    X_val, X_test, y_val, y_test = train_test_split(X_eval, y_eval, test_size=0.5, random_state=random_state, stratify=y_eval)
+    # split data for training
+    train_split = split[0]/100
+    X_train, X_eval, y_train, y_eval = train_test_split(X, y, train_size=train_split, random_state=random_state, stratify=y)
+    # split remaining data between validation and testing
+    test_size = split[2]/(100-split[0])
+    X_val, X_test, y_val, y_test = train_test_split(X_eval, y_eval, test_size=test_size, random_state=random_state, stratify=y_eval)
     
     # Sort and reset indexes
     X_train = X_train.sort_index().reset_index(drop=True)

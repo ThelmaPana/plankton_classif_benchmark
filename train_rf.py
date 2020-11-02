@@ -14,6 +14,7 @@ rf_settings = read_settings.check_rf()
 # Input data
 instrument = global_settings['input_data']['instrument']
 data_dir = os.path.join('data', instrument)
+split = global_settings['input_data']['split']
 n_max = global_settings['input_data']['n_max']
 
 # Random state
@@ -42,6 +43,7 @@ n_estimators = rf_settings['hyperparameters']['n_estimators']
 ## Read data for RF
 df_train, df_valid, df_test = datasets.read_data_rf(
     path=os.path.join(data_dir, '_'.join([instrument, 'data.csv'])),
+    split=split,
     n_max=n_max,
     random_state=random_state)
 
