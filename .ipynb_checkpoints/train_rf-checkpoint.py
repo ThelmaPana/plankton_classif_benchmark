@@ -7,29 +7,34 @@ from plotnine import *
 from sklearn.metrics import accuracy_score
 
 #################################### Settings ####################################       
-## Data
-instrument = 'isiis'
+## Read settings
+global_settings = read_settings.check_global()
+rf_settings = read_settings.check_rf()
+
+# Input data
+instrument = global_settings['input_data']['instrument']
 data_dir = os.path.join('data', instrument)
-random_state = 42
 
-## RF model
-n_jobs = 6 
-gridsearch_go = True
-max_features_try = [4,6,8,10]
-min_samples_leaf_try = [2,5,10]
-n_estimators_try = [100,200,350,500]
+# Random state
+random_state = global_settings['random_state']
 
-## Outputs
+# Output
 output_dir = '_'.join(['output_rf', instrument])
-# Check if output_directory exists, if not create it
-if not os.path.exists(output_dir):
-    os.mkdir(output_dir)
-    
-delete_previous = True # whether to delete files in output directory
-if delete_previous:
+if global_settings['delete_previous']:
     files = glob.glob(os.path.join(output_dir, '*'))
     for f in files:
         os.remove(f)
+
+# RF settings
+n_jobs = rf_settings['n_jobs'] 
+
+max_features_try = rf_settings['grid_search']['max_features_try']
+min_samples_leaf_try = rf_settings['grid_search']['min_samples_leaf_try']
+n_estimators_try = rf_settings['grid_search']['n_estimators_try']
+
+max_features = rf_settings['hyperparameters']['max_features']
+min_samples_leaf = rf_settings['hyperparameters']['min_samples_leaf']
+n_estimators = rf_settings['hyperparameters']['n_estimators']
         
 ##################################################################################
 
@@ -46,12 +51,12 @@ df_test.to_csv(os.path.join(output_dir, 'df_test.csv'), index=False)
 
 ## Grid search
 # Do grid serach
-if gridsearch_go:
+if rf_settings['grid_search']['go']:
     gs_results, best_params = model_rf.gridsearch_rf(
         df_train, 
         df_valid, 
-        max_features_try=max_features_try, 
-        min_samples_leaf_try=min_samples_leaf_try, 
+        max_features_try=max_features_try,
+        min_samples_leaf_try=min_samples_leaf_try,
         n_estimators_try=n_estimators_try,
         output_dir=output_dir,
         n_jobs=n_jobs,
@@ -72,7 +77,6 @@ if gridsearch_go:
 
 
 ## Fit the RF of training data
-# 200 trees is enough
 rf = model_rf.train_rf(
     df=df_train, 
     n_estimators=n_estimators, 
