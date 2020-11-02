@@ -90,13 +90,6 @@ for image_batch, label_batch in train_batches:
     print("Label batch shape: ", label_batch.shape)
     break
 
-# glimpse at batch
-#if glimpse:
-#    datasets.batch_glimpse(test_batches, classes)
-
-    
-
-
 ## Generate CNN
 my_cnn = model_cnn.create_cnn(
     fc_layers_nb,
