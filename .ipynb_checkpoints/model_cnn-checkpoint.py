@@ -11,7 +11,7 @@ import glob
 
 
 
-def create_cnn(fc_layers_nb, fc_layers_dropout, fc_layers_size, classif_layer_dropout, classif_layer_size,  train_layers = 'head', glimpse = False):
+def create_cnn(fc_layers_nb, fc_layers_dropout, fc_layers_size, classif_layer_dropout, classif_layer_size,  train_layers = 'head', glimpse = True):
 
     """
     Generates a CNN model. 

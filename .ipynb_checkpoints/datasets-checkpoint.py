@@ -8,6 +8,7 @@ import cv2
 import lycon
 import random
 import matplotlib.pyplot as plt
+from imgaug import augmenters as iaa
 
 
 def read_data_cnn(path, random_state=None):
@@ -87,6 +88,20 @@ class DataGenerator(utils.Sequence):
         classif_id_enc = mlb.fit_transform([[c] for c in classif_id])
         return classif_id_enc
 
+    def augmenter(self, images):
+        seq = iaa.Sequential(
+            [
+                iaa.Fliplr(0.5),  # horizontally flip 50% of all images
+                iaa.Flipud(0.5),  # vertically flip 20% of all images
+                iaa.Affine(
+                    scale={"x": (0.8, 1.2), "y": (0.8, 1.2)}, # scale images to 80-120% of their size, individually per axis
+                    shear=(-15, 15),  # shear by -15 to +15 degrees
+                    cval=(1), # pad images with white
+                ),
+            ],
+            random_order=True
+        )
+        return seq(images=images)
 
     def __getitem__(self, index):
         'Generate one batch of data'
@@ -94,7 +109,6 @@ class DataGenerator(utils.Sequence):
         indexes = self.indexes[index * self.batch_size : (index + 1) * self.batch_size]
 
         # select data and load images
-        #images = [cv2.imread(self.df.path_to_img[k])/255 for k in indexes]
         paths = [os.path.join(self.data_dir, self.df.path_to_img[k]) for k in indexes]
         images = [cv2.imread(p)/255 for p in paths]
         
@@ -138,6 +152,11 @@ class DataGenerator(utils.Sequence):
         
         # convert to array of images        
         square_images = np.array([img for img in square_images], dtype='float32')
+        
+        # data augmentation
+        if self.augment == True:
+            square_images = self.augmenter(square_images)
+            
         
         ## Labels
         classif_id_enc = self.class_encoder()

@@ -50,4 +50,4 @@ cnn:
     loss: 'sfce' # computation of loss. 'cce' for categorical cross entropy; 'sfce' for sigmoid focal cross entropy.
 
   training:
-    epochs: 5 # number of epochs to train for
+    epochs: 20 # number of epochs to train for
