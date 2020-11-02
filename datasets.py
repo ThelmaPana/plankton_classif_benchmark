@@ -19,6 +19,7 @@ def read_data_cnn(path, split=[70, 15, 15], n_max=None, random_state=None):
         path (str): path to the file
         split (list): proportions for train, validation and test splits. Sum is 100.
         n_max (NoneType or int): maximum number of objects per class for training set
+        random_state (int or RandomState): controls both the randomness of the bootstrapping and features sampling; default=None
     
     Returns:
         df_train (DataFrame): training data containing path to image and classif_id
