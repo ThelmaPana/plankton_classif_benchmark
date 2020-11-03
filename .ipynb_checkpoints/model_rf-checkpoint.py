@@ -169,16 +169,18 @@ def predict_evaluate_rf(rf_model, df, output_dir):
     # Predict test data
     y_pred = rf_model.predict(X)
     
-    # Write true and predicted classes to test file
-    with open(os.path.join(output_dir, 'test_results.pickle'),'wb') as test_file:
-        pickle.dump({'true_classes' : y,
-                     'predicted_classes' : y_pred,
-                     'classes' : classes},
-                    test_file)
-    
     # Compute accuracy between true labels and predicted labels
     accuracy = accuracy_score(y, y_pred)
     print(f'Test accuracy = {accuracy}')
+    
+    # Write true and predicted classes and accuracy to test file
+    with open(os.path.join(output_dir, 'test_results.pickle'),'wb') as test_file:
+        pickle.dump({'true_classes': y,
+                     'predicted_classes': y_pred,
+                     'classes': classes,
+                     'accuracy': accuracy},
+                    test_file)
+        
     return(accuracy)
     
 

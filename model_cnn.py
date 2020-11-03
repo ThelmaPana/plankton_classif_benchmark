@@ -156,7 +156,7 @@ def train_cnn(model, train_batches, valid_batches, batch_size, epochs, class_wei
 
 def predict_evaluate_cnn(model, batches, classes, output_dir):
     """
-    Predict batches and evaluate a CNN model by computing accuracy and loss and writting predictions into a test file. 
+    Predict batches and evaluate a CNN model by computing accuracy and loss and writting predictions and accuracy into a test file. 
     
     Args:
         model (tensorflow.python.keras.engine.sequential.Sequential): CNN model to eavluate
@@ -191,13 +191,6 @@ def predict_evaluate_cnn(model, batches, classes, output_dir):
     predicted_classes = classes[np.argmax(predicted_batches, axis=1)]
     true_classes = classes[np.argmax(true_batches, axis=1)]
     
-    # Write true and predicted classes to test file
-    with open(os.path.join(output_dir, 'test_results.pickle'),'wb') as test_file:
-        pickle.dump({'true_classes' : true_classes,
-                     'predicted_classes' : predicted_classes,
-                     'classes' : classes},
-                    test_file)
-    
     # Compute accuracy and loss from true labels and predicted labels
     accuracy = accuracy_score(true_classes, predicted_classes)
     cce = losses.CategoricalCrossentropy()
@@ -205,4 +198,12 @@ def predict_evaluate_cnn(model, batches, classes, output_dir):
     print(f'Test accuracy = {accuracy}')
     print(f'Test loss = {loss}')
     
+    # Write true and predicted classes to test file
+    with open(os.path.join(output_dir, 'test_results.pickle'),'wb') as test_file:
+        pickle.dump({'true_classes': true_classes,
+                     'predicted_classes': predicted_classes,
+                     'classes': classes,
+                     'accuracy': accuracy},
+                    test_file)
+        
     return accuracy, loss
