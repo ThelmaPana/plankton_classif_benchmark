@@ -131,7 +131,8 @@ def train_rf(df, n_estimators, max_features, min_samples_leaf, n_jobs, random_st
         criterion='gini', 
         min_samples_split=2, 
         min_samples_leaf=min_samples_leaf, 
-        max_features=max_features
+        max_features=max_features,
+        n_jobs=n_jobs
     )
     
     # Fit the RF model

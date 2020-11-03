@@ -218,8 +218,8 @@ def read_data_rf(path, split = [70, 15, 15], n_max=None, random_state=None):
     
     # TODO check that mandatory columns are present: 'object_id', 'classif_id', 'path_to_img'
     
-    # Delete columns 'path_to_img' and 'object_id'
-    df = df.drop(columns=['object_id', 'path_to_img'])
+    # Delete columns 'path_to_img' 
+    df = df.drop(columns=['path_to_img'])
     
     # Make a stratified sampling by classif_id
     y = df.pop('classif_id')
