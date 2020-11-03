@@ -3,14 +3,14 @@
 # Global settings
 global:
     # Reproducibility
-    random_state: 42 # 'null' for no reproducibility, any integer for reproducibility.
+    random_state: 12 # 'null' for no reproducibility, any integer for reproducibility.
     
     # Delete previous training outputs
     delete_previous: true # if 'true', delete previous training outputs for the trained model and instrument.
     
     # Input data
     input_data:
-      instrument: 'isiis' # name of the instrument. 
+      instrument: 'zooscan' # name of the instrument. 
       split: [70, 15, 15] # split for training / validation / test. Sum should equal 100.
       n_max: 5000 # maximum number of objects in each class for training data
 
@@ -51,4 +51,4 @@ cnn:
     loss: 'cce' # computation of loss. 'cce' for categorical cross entropy; 'sfce' for sigmoid focal cross entropy.
 
   training:
-    epochs: 10 # number of epochs to train for
+    epochs: 50 # number of epochs to train for
