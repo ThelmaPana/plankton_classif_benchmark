@@ -1,7 +1,7 @@
 # plankton_classif_benchmark
 Benchmark for plankton images classifications methods for images from multiple plankton imaging devices (ISIIS, Zooscan, Flowcam, etc.)
 
-This tool allows you to do a comparison between a Convolutional Neural Network and a Random Forest classifier on a dataset of plankton images. 
+This tool allows you to run a comparison between a Convolutional Neural Network and a Random Forest classifier on a dataset of plankton images. 
 
 Link to paper: https://docs.google.com/document/d/1pFkKo07n_23ZIclz11tnBPKEnYmTRYWxtYccPv9iqFE/edit?usp=sharing
 
@@ -58,10 +58,8 @@ Random Forest parameters are optimized with a gridsearch including:
 For each set of parameters, model is trained on training data and evaluated on validation data. Finally, the best model is trained on training data and tested on test data.
 
 ## Outputs
-When you run `train_cnn.py` or `train_rf.py`, an output directory is created and results are stored in this directory. Use the notebooks `inspect_cnn_results.ipynb`and `inspect_rf_results.ipynb` to explore the results. 
+When you run `train_cnn.py` or `train_rf.py`, an output directory is created and results are stored in this directory. 
+Results for each model and dataset can be explored with the notebooks `inspect_cnn_results.ipynb`and `inspect_rf_results.ipynb`.
+Comparison of results across models and datasets is implemented in the notebook `comparison.ipynb`.
 
-## TODOs
-
-- [ ] train models with data from other instruments
-- [ ] aggregate all comparisons in one file
 
