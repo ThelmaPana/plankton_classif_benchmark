@@ -126,11 +126,11 @@ def check_cnn():
         'cnn > architecture > fc_layers_size should be a positive integer'
     assert isinstance(settings['architecture']['fc_layers_dropout'], float) and \
         (settings['architecture']['fc_layers_dropout'] >= 0) and \
-        (settings['architecture']['fc_layers_dropout'] <= 1), \
+        (settings['architecture']['fc_layers_dropout'] < 1), \
         'cnn > architecture > fc_layers_dropout should be a float between 0 and 1'
     assert isinstance(settings['architecture']['classif_layer_dropout'], float) and \
         (settings['architecture']['classif_layer_dropout'] >= 0) and \
-        (settings['architecture']['classif_layer_dropout'] <= 1), \
+        (settings['architecture']['classif_layer_dropout'] < 1), \
         'cnn > architecture > classif_layer_dropout should be a float between 0 and 1'
     assert isinstance(settings['architecture']['train_fe'], bool), \
         'cnn > architecture > train_fe should be a boolean'
@@ -140,13 +140,14 @@ def check_cnn():
         settings['compilation']['lr_method'] in ['decay', 'constant'], \
         'cnn > compilation > lr_method should be "decay" on "constant"'
     assert isinstance(settings['compilation']['initial_lr'], float) and \
-        (settings['compilation']['initial_lr'] >= 0) and \
-        (settings['compilation']['initial_lr'] <= 1), \
+        (settings['compilation']['initial_lr'] > 0) and \
+        (settings['compilation']['initial_lr'] < 1), \
         'cnn > compilation > initial_lr should be an float between 0 and 1'
-    assert isinstance(settings['compilation']['decay_rate'], float) and \
-        (settings['compilation']['decay_rate'] >= 0) and \
-        (settings['compilation']['decay_rate'] <= 1), \
-        'cnn > compilation > decay_rate should be an float between 0 and 1'
+    if settings['compilation']['lr_method'] == 'decay': 
+        assert isinstance(settings['compilation']['decay_rate'], float) and \
+            (settings['compilation']['decay_rate'] > 0) and \
+            (settings['compilation']['decay_rate'] < 1), \
+            'cnn > compilation > decay_rate should be an float between 0 and 1'
     assert isinstance(settings['compilation']['loss'], str)and \
         settings['compilation']['loss'] in ['cce', 'sfce'], \
         'cnn > compilation > loss should be "cce" or "sfce"'

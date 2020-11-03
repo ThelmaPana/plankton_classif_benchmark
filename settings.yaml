@@ -35,7 +35,7 @@ cnn:
     preserve_size: false # whether to perserve size of organisms when images are resized for cnn input.
     # If true, small images will be padded to desired size; if false, small images will be resized to desired size. 
     augment: true # wheter to use data augmentation for training
-    use_weights: true # whether to use class weights for training
+    use_weights: false # whether to use class weights for training
   
   architecture:
     fc_layers_nb: 2 # number of fully connected layers to insert between the feature extractor and the classification clayer
@@ -48,7 +48,7 @@ cnn:
     lr_method: 'decay' # learning rate evolution. 'decay' for a decaying learning rate; 'constant' for a constant learning rate
     initial_lr: 0.001 # initial learning rate
     decay_rate: 0.97 # rate for learning rate decay
-    loss: 'sfce' # computation of loss. 'cce' for categorical cross entropy; 'sfce' for sigmoid focal cross entropy.
+    loss: 'cce' # computation of loss. 'cce' for categorical cross entropy; 'sfce' for sigmoid focal cross entropy.
 
   training:
-    epochs: 20 # number of epochs to train for
+    epochs: 50 # number of epochs to train for

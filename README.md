@@ -58,7 +58,7 @@ Random Forest parameters are optimized with a gridsearch including:
 For each set of parameters, model is trained on training data and evaluated on validation data. Finally, the best model is trained on training data and tested on test data.
 
 ## Outputs
-When you run `train_cnn.py` or `train_rf.py`, an output directory is created and results are stored in this directory. Use the notebooks `inspect_results_cnn.ipynb`and `inspect_results_rf.ipynb` to explore the results. 
+When you run `train_cnn.py` or `train_rf.py`, an output directory is created and results are stored in this directory. Use the notebooks `inspect_cnn_results.ipynb`and `inspect_rf_results.ipynb` to explore the results. 
 
 ## TODOs
 
