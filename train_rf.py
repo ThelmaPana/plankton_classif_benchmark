@@ -56,7 +56,7 @@ df_comp = pd.concat([
     pd.concat([df_valid['classif_id'], pd.DataFrame({'split':['valid'] * len(df_valid)})], axis=1),
     pd.concat([df_test['classif_id'], pd.DataFrame({'split':['test'] * len(df_test)})], axis=1)
 ], axis=0, ignore_index=True).groupby(['classif_id','split']).size().unstack(fill_value=0)
-df_comp.to_csv(os.path.join(output_dir, 'df_comp.csv'), index=False)
+df_comp.to_csv(os.path.join(output_dir, 'df_comp.csv'), index=True)
 
 
 ## Grid search
