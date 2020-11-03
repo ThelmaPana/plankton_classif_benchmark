@@ -3,6 +3,7 @@ import glob
 import read_settings
 import datasets
 import model_rf
+import pandas as pd
 from plotnine import *
 from sklearn.metrics import accuracy_score
 

@@ -10,7 +10,7 @@ global:
     
     # Input data
     input_data:
-      instrument: 'zooscan' # name of the instrument. 
+      instrument: 'isiis' # name of the instrument. 
       split: [70, 15, 15] # split for training / validation / test. Sum should equal 100.
       n_max: 5000 # maximum number of objects in each class for training data
 
