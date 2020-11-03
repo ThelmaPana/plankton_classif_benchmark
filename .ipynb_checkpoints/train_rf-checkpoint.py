@@ -21,9 +21,9 @@ n_max = global_settings['input_data']['n_max']
 random_state = global_settings['random_state']
 
 # Output
-output_dir = '_'.join(['output_rf', instrument])
+output_dir = os.path.join('output', '_'.join(['rf', instrument]))
 if not os.path.exists(output_dir):
-    os.mkdir(output_dir)
+    os.makedirs(output_dir)
 if global_settings['delete_previous']:
     files = glob.glob(os.path.join(output_dir, '*'))
     for f in files:
