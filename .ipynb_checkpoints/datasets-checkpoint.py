@@ -148,8 +148,8 @@ class DataGenerator(utils.Sequence):
                 w = img.shape[1]  
             
             # create a square, blank output, of desired dimension
-            #img_square = np.ones(output_shape)
-            img_square = np.ones(self.image_dimensions)
+            pad_value = self.get_padding_value(img)
+            img_square = np.full(self.image_dimensions, pad_value)
             
             # compute number of pixels to leave blank 
             offset_ver = int((output_size-h)/2) # on top and bottom of image

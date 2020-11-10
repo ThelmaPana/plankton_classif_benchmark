@@ -95,7 +95,7 @@ train_batches = datasets.DataGenerator(
     batch_size=batch_size, 
     augment=augment,
     px_del=px_del)    
-    
+
 valid_batches = datasets.DataGenerator(
     df=df_valid,
     data_dir=data_dir,
