@@ -124,14 +124,13 @@ class DataGenerator(utils.Sequence):
                 iaa.Affine(
                     scale={"x": (0.8, 1.2), "y": (0.8, 1.2)}, # scale images to 80-120% of their size, individually per axis
                     shear=(-15, 15),  # shear by -15 to +15 degrees
-                    cval=(1), # pad images with white
+                    mode='edge',
+                    #cval=(1), # pad images with white
                 ),
             ],
             random_order=True
         )
         return seq(images=images)
-    
-
 
     def __getitem__(self, index):
         'Generate one batch of data'
@@ -168,11 +167,8 @@ class DataGenerator(utils.Sequence):
                 h = img.shape[0]
                 w = img.shape[1]  
             
-            # create a square, blank output, of desired dimension
-            #img_square = np.ones(output_shape)
+            # create a square, empty output, of desired dimension, filled with padding value
             pad_value = self.get_padding_value(img)
-            
-            #img_square = np.ones(self.image_dimensions)
             img_square = np.full(self.image_dimensions, pad_value)
             
             # compute number of pixels to leave blank 
@@ -190,7 +186,6 @@ class DataGenerator(utils.Sequence):
         if self.augment == True:
             square_images = self.augmenter(square_images)
             
-        
         ## Labels
         classif_id_enc = self.class_encoder()
         labels = [classif_id_enc[k].tolist() for k in indexes]
