@@ -96,7 +96,26 @@ class DataGenerator(utils.Sequence):
         classif_id = self.df['classif_id'].tolist()
         classif_id_enc = mlb.fit_transform([[c] for c in classif_id])
         return classif_id_enc
-
+    
+    def get_padding_value(self, img):
+        'Compute value to use to pad an image, as the median value of border pixels'
+        # get height and width of image
+        h = img.shape[0]
+        w = img.shape[1]
+        
+        # concatenate border pixels in an array
+        borders = np.concatenate((
+            img[:, 0],         # left column
+            img[:, w-1],       # right column
+            img[0, 1:w-2],     # top line without corners
+            img[h-1, 1:w-2],   # bottom line without corners        
+        ), axis=0)
+        
+        # compute the median
+        pad_value = np.median(borders)
+        
+        return pad_value
+    
     def augmenter(self, images):
         seq = iaa.Sequential(
             [
@@ -111,6 +130,8 @@ class DataGenerator(utils.Sequence):
             random_order=True
         )
         return seq(images=images)
+    
+
 
     def __getitem__(self, index):
         'Generate one batch of data'
@@ -148,7 +169,10 @@ class DataGenerator(utils.Sequence):
                 w = img.shape[1]  
             
             # create a square, blank output, of desired dimension
+            #img_square = np.ones(output_shape)
             pad_value = self.get_padding_value(img)
+            
+            #img_square = np.ones(self.image_dimensions)
             img_square = np.full(self.image_dimensions, pad_value)
             
             # compute number of pixels to leave blank 
