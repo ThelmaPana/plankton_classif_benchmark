@@ -27,8 +27,8 @@ def gridsearch_rf(df1, df2, max_features_try, min_samples_leaf_try, n_estimators
     """
     
     # Shuffle data
-    df1 = df1.sample(frac=1).reset_index(drop=True)
-    df2 = df2.sample(frac=1).reset_index(drop=True)
+    df1 = df1.sample(frac=1, random_state=random_state).reset_index(drop=True)
+    df2 = df2.sample(frac=1, random_state=random_state).reset_index(drop=True)
     
     # Split data and labels
     y_train = df1['classif_id']
@@ -65,7 +65,8 @@ def gridsearch_rf(df1, df2, max_features_try, min_samples_leaf_try, n_estimators
             max_features=max_features, 
             min_samples_leaf=min_samples_leaf,
             warm_start=True,
-            n_jobs=6
+            n_jobs=6,
+            random_state=random_state
         )
         
         # Second loop on n_estimators
@@ -132,7 +133,8 @@ def train_rf(df, n_estimators, max_features, min_samples_leaf, n_jobs, random_st
         min_samples_split=2, 
         min_samples_leaf=min_samples_leaf, 
         max_features=max_features,
-        n_jobs=n_jobs
+        n_jobs=n_jobs,
+        random_state=random_state
     )
     
     # Fit the RF model
