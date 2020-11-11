@@ -120,7 +120,7 @@ my_cnn = model_cnn.create_cnn(
     fc_layers_size, 
     classif_layer_dropout, 
     classif_layer_size=nb_classes, 
-    train_layers='all', 
+    train_fe=train_fe, 
     glimpse=True)
 
 ## Compile CNN

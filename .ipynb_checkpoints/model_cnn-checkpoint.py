@@ -11,7 +11,7 @@ import glob
 
 
 
-def create_cnn(fc_layers_nb, fc_layers_dropout, fc_layers_size, classif_layer_dropout, classif_layer_size,  train_layers = 'head', glimpse = True):
+def create_cnn(fc_layers_nb, fc_layers_dropout, fc_layers_size, classif_layer_dropout, classif_layer_size,  train_fe = False, glimpse = True):
 
     """
     Generates a CNN model. 
@@ -22,7 +22,7 @@ def create_cnn(fc_layers_nb, fc_layers_dropout, fc_layers_size, classif_layer_dr
         fc_layers_dropout (float): dropout of fully connected layers 
         classif_layer_size (int): size of classification layer (i.e. number of classes to predict)
         classif_layer_dropout (float): dropout of classification layer
-        train_layers (str): whether to train only classification head ('head') or all layers ('all')
+        train_fe (bool): whether to train the feature extractor (True) or only classification head (False)
         glimpse(bool): whether to show a model summary
     
     Returns:
@@ -36,9 +36,8 @@ def create_cnn(fc_layers_nb, fc_layers_dropout, fc_layers_size, classif_layer_dr
     ## MobileNet V2 feature extractor
     fe_url = "https://tfhub.dev/google/tf2-preview/mobilenet_v2/feature_vector/4"
     fe_layer = hub.KerasLayer(fe_url, input_shape=(224, 224, 3))
-    # If all layers should be trained, set feature extractor to trainable
-    if train_layers == 'all':
-        fe_layer.trainable=True
+    # Set feature extractor to trainability
+    fe_layer.trainable=train_fe
     model.add(fe_layer)
     
     ## Fully connected layers
