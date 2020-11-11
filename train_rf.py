@@ -75,12 +75,6 @@ if rf_settings['grid_search']['go']:
         random_state=random_state
     )
     
-    # Plot results
-    ggplot.draw(ggplot(gs_results) +
-      geom_point(aes(x='max_features', y='valid_accuracy', colour='factor(n_estimators)'))+
-      facet_wrap('~min_samples_leaf', labeller = 'label_both') +
-      labs(colour='n_estimators', title = 'Gridsearch results'))
-    
     # Set parameters for future RF models
     n_estimators = best_params['n_estimators']
     max_features = best_params['max_features']

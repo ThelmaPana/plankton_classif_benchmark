@@ -10,7 +10,7 @@ global:
     
     # Input data
     input_data:
-      instrument: 'isis' # name of the instrument. 
+      instrument: 'isiis' # name of the instrument. 
       split: [70, 15, 15] # split for training / validation / test. Sum should equal 100.
       n_max: 5000 # maximum number of objects in each class for training data
 
@@ -35,7 +35,7 @@ cnn:
     preserve_size: false # whether to perserve size of organisms when images are resized for cnn input.
     # If true, small images will be padded to desired size; if false, small images will be resized to desired size. 
     augment: true # wheter to use data augmentation for training
-    use_weights: false # whether to use class weights for training
+    use_weights: true # whether to use class weights for training
   
   architecture:
     fc_layers_nb: 2 # number of fully connected layers to insert between the feature extractor and the classification clayer
