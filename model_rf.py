@@ -65,7 +65,7 @@ def gridsearch_rf(df1, df2, max_features_try, min_samples_leaf_try, n_estimators
             max_features=max_features, 
             min_samples_leaf=min_samples_leaf,
             warm_start=True,
-            n_jobs=6,
+            n_jobs=n_jobs,
             random_state=random_state
         )
         
