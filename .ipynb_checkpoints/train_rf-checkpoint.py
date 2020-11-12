@@ -54,6 +54,9 @@ if prev_output:
 output_dir = os.path.join('output', '_'.join(['rf', instrument, datetime.datetime.now().strftime("%Y%m%d-%H%M%S-%f")]))
 os.mkdir(output_dir)
 
+# Write settings to output directory
+read_settings.write_rf_settings(global_settings, rf_settings, output_dir)
+
 # RF settings
 n_jobs = rf_settings['n_jobs'] 
 

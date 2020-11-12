@@ -57,6 +57,9 @@ if prev_output:
 output_dir = os.path.join('output', '_'.join(['cnn', instrument, datetime.datetime.now().strftime("%Y%m%d-%H%M%S-%f")]))
 os.mkdir(output_dir)
 
+# Write settings to output directory
+read_settings.write_cnn_settings(global_settings, cnn_settings, output_dir)
+
 # CNN settings
 batch_size    = cnn_settings['data']['batch_size']
 px_del        = cnn_settings['data']['px_del']

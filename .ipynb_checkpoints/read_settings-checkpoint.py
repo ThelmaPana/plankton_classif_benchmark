@@ -1,6 +1,6 @@
 import yaml
 import os
-
+import pickle
 
 def check_global():
     """
@@ -156,5 +156,49 @@ def check_cnn():
     return settings
     
 
+def write_rf_settings(global_settings, rf_settings, output_dir):
+    """
+    Write settings to output directory for random forest training. s
     
+    Args:
+        global_settings (dict): global settings
+        rf_settings (dict): random forest settings
+        output_dir (str): output directory     
+ 
+    """
     
+    # Concatenate all settings in one directory
+    settings = {
+        'global_settings': global_settings,
+        'rf_settings': rf_settings,
+    }   
+    
+    # Write settings to output directory
+    with open(os.path.join(output_dir, 'settings.pickle'),'wb') as settings_file:
+        pickle.dump(settings, settings_file)
+
+    pass
+
+        
+def write_cnn_settings(global_settings, cnn_settings, output_dir):
+    """
+    Write settings to output directory for random forest training. s
+    
+    Args:
+        global_settings (dict): global settings
+        cnn_settings (dict): cnn settings
+        output_dir (str): output directory     
+ 
+    """
+    
+    # Concatenate all settings in one directory
+    settings = {
+        'global_settings': global_settings,
+        'cnn_settings': cnn_settings,
+    }   
+    
+    # Write settings to output directory
+    with open(os.path.join(output_dir, 'settings.pickle'),'wb') as settings_file:
+        pickle.dump(settings, settings_file)
+
+    pass
