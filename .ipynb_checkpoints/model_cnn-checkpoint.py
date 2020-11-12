@@ -180,11 +180,24 @@ def predict_evaluate_cnn(model, batches, classes, output_dir):
     true_batches = []
     
     # Loop over test batches
-    for image_batch, label_batch in batches:
-        # Predict images of batch
-        predicted_batches.extend(model.predict(image_batch))
-        # Extract true labels of batch
-        true_batches.extend(label_batch)
+#    for image_batch, label_batch in batches:
+#        # Predict images of batch
+#        predicted_batches.extend(model.predict(image_batch))
+#        # Extract true labels of batch
+#        true_batches.extend(label_batch)
+    
+    # Loop over test batches
+    for i in range(len(batches)+1):
+        # Define image batch and label batch
+        image_batch = batches[i][0]
+        label_batch = batches[i][1]
+        
+        # if batch is not empty, predict it
+        if len(image_batch) > 0:
+            # Predict images of batch
+            predicted_batches.extend(model.predict(image_batch))
+            # Extract true labels of batch
+            true_batches.extend(label_batch)
     
     # Convert to class names
     predicted_classes = classes[np.argmax(predicted_batches, axis=1)]
