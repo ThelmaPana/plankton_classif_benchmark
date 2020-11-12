@@ -5,9 +5,6 @@ global:
     # Reproducibility
     random_state: 12 # 'null' for no reproducibility, any integer for reproducibility.
     
-    # Delete previous training outputs
-    delete_previous: true # if 'true', delete previous training outputs for the trained model and instrument.
-    
     # Input data
     input_data:
       instrument: 'isiis' # name of the instrument. 
@@ -51,4 +48,4 @@ cnn:
     loss: 'cce' # computation of loss. 'cce' for categorical cross entropy; 'sfce' for sigmoid focal cross entropy.
 
   training:
-    epochs: 100 # number of epochs to train for
+    epochs: 10 # number of epochs to train for

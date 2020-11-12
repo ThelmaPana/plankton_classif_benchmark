@@ -19,10 +19,6 @@ def check_global():
     assert (settings['random_state'] is None) or isinstance(settings['random_state'], int), \
         'global > random_state should be none or an integer'
     
-    ## Delete previous outputs
-    assert isinstance(settings['delete_previous'], bool), \
-        'global > delete_previous should be a boolean'
-    
     ## Input data
     # input directory
     assert isinstance(settings['input_data']['instrument'], str), \

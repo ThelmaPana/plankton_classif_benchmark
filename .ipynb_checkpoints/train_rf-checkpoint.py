@@ -6,6 +6,9 @@ import read_settings
 import datasets
 import model_rf
 import pandas as pd
+import tarfile
+import shutil
+import datetime
 from plotnine import *
 from sklearn.metrics import accuracy_score
 
@@ -24,13 +27,32 @@ n_max = global_settings['input_data']['n_max']
 random_state = global_settings['random_state']
 
 # Output
-output_dir = os.path.join('output', '_'.join(['rf', instrument]))
-if not os.path.exists(output_dir):
-    os.makedirs(output_dir)
-if global_settings['delete_previous']:
-    files = glob.glob(os.path.join(output_dir, '*'))
-    for f in files:
-        os.remove(f)
+output_dir_pat = os.path.join('output', '_'.join(['rf', instrument]))
+
+# Look for previous output
+prev_output = glob.glob(output_dir_pat + '*')
+# If an previous output exists, make a tar.gz archive
+if prev_output:
+    prev_output = prev_output[0]
+    with tarfile.open(prev_output + '.tar.gz', "w:gz") as tar:
+        tar.add(prev_output, arcname=os.path.basename(prev_output))
+        tar.close()
+    
+    # Delete directory with old output
+    shutil.rmtree(prev_output)
+     
+    # Check if a directory exists for old outputs
+    old_output_dir = os.path.join('output', 'old')
+    # If it does not exist, create it
+    if not os.path.exists(old_output_dir):
+        os.makedirs(old_output_dir)
+
+    # Move tar.gz file with old outputs
+    shutil.move(prev_output + '.tar.gz', os.path.join(old_output_dir, os.path.basename(prev_output) + '.tar.gz'))
+
+# Create a new output directory
+output_dir = os.path.join('output', '_'.join(['rf', instrument, datetime.datetime.now().strftime("%Y%m%d-%H%M%S-%f")]))
+os.mkdir(output_dir)
 
 # RF settings
 n_jobs = rf_settings['n_jobs'] 

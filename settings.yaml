@@ -5,9 +5,6 @@ global:
     # Reproducibility
     random_state: 12 # 'null' for no reproducibility, any integer for reproducibility.
     
-    # Delete previous training outputs
-    delete_previous: true # if 'true', delete previous training outputs for the trained model and instrument.
-    
     # Input data
     input_data:
       instrument: 'isiis' # name of the instrument. 
@@ -35,7 +32,7 @@ cnn:
     preserve_size: false # whether to perserve size of organisms when images are resized for cnn input.
     # If true, small images will be padded to desired size; if false, small images will be resized to desired size. 
     augment: true # wheter to use data augmentation for training
-    use_weights: true # whether to use class weights for training
+    use_weights: false # whether to use class weights for training
   
   architecture:
     fc_layers_nb: 2 # number of fully connected layers to insert between the feature extractor and the classification clayer
@@ -51,4 +48,4 @@ cnn:
     loss: 'cce' # computation of loss. 'cce' for categorical cross entropy; 'sfce' for sigmoid focal cross entropy.
 
   training:
-    epochs: 100 # number of epochs to train for
+    epochs: 10 # number of epochs to train for
