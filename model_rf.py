@@ -173,7 +173,7 @@ def predict_evaluate_rf(rf_model, df, output_dir):
     
     # Compute accuracy between true labels and predicted labels
     accuracy = accuracy_score(y, y_pred)
-    balanced_accuracy = balanced_accuracy_score(true_classes, predicted_classes)
+    balanced_accuracy = balanced_accuracy_score(y, y_pred)
     print(f'Test accuracy = {accuracy}')
     print(f'Balanced test accuracy = {balanced_accuracy}')
     
