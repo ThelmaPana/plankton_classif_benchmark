@@ -4,7 +4,7 @@ import itertools as it
 import os
 import pickle
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import accuracy_score
+from sklearn.metrics import accuracy_score, balanced_accuracy_score
 
 
 def gridsearch_rf(df1, df2, max_features_try, min_samples_leaf_try, n_estimators_try, output_dir, n_jobs, random_state=None):
@@ -173,14 +173,17 @@ def predict_evaluate_rf(rf_model, df, output_dir):
     
     # Compute accuracy between true labels and predicted labels
     accuracy = accuracy_score(y, y_pred)
+    balanced_accuracy = balanced_accuracy_score(true_classes, predicted_classes)
     print(f'Test accuracy = {accuracy}')
+    print(f'Balanced test accuracy = {balanced_accuracy}')
     
     # Write true and predicted classes and accuracy to test file
     with open(os.path.join(output_dir, 'test_results.pickle'),'wb') as test_file:
         pickle.dump({'true_classes': y,
                      'predicted_classes': y_pred,
                      'classes': classes,
-                     'accuracy': accuracy},
+                     'accuracy': accuracy,
+                     'balanced_accuracy': balanced_accuracy},
                     test_file)
         
     return(accuracy)

@@ -1,12 +1,12 @@
 import tensorflow as tf
 import tensorflow_hub as hub
 import tensorflow_addons as tfa
-from tensorflow.keras import layers, optimizers, losses, callbacks #, applications, models, backend, experimental
+from tensorflow.keras import layers, optimizers, losses, callbacks 
 import tensorflow_addons as tfa
 import os
 import pickle
 import numpy as np
-from sklearn.metrics import accuracy_score
+from sklearn.metrics import accuracy_score, balanced_accuracy_score
 import glob
 
 
@@ -205,9 +205,11 @@ def predict_evaluate_cnn(model, batches, classes, output_dir):
     
     # Compute accuracy and loss from true labels and predicted labels
     accuracy = accuracy_score(true_classes, predicted_classes)
+    balanced_accuracy = balanced_accuracy_score(true_classes, predicted_classes)
     cce = losses.CategoricalCrossentropy()
     loss = cce(true_batches, predicted_batches).numpy()
     print(f'Test accuracy = {accuracy}')
+    print(f'Balanced test accuracy = {balanced_accuracy}')
     print(f'Test loss = {loss}')
     
     # Write true and predicted classes to test file
@@ -215,7 +217,8 @@ def predict_evaluate_cnn(model, batches, classes, output_dir):
         pickle.dump({'true_classes': true_classes,
                      'predicted_classes': predicted_classes,
                      'classes': classes,
-                     'accuracy': accuracy},
+                     'accuracy': accuracy,
+                     'balanced_accuracy': balanced_accuracy},
                     test_file)
         
     return accuracy, loss
