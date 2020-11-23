@@ -36,17 +36,20 @@ def create_cnn(fc_layers_nb, fc_layers_dropout, fc_layers_size, classif_layer_dr
     ## MobileNet V2 feature extractor
     fe_url = "https://tfhub.dev/google/tf2-preview/mobilenet_v2/feature_vector/4"
     fe_layer = hub.KerasLayer(fe_url, input_shape=(224, 224, 3))
-    # Set feature extractor to trainability
+    # Set feature extractor trainability
     fe_layer.trainable=train_fe
     model.add(fe_layer)
     
     ## Fully connected layers
-    for i in range(fc_layers_nb):
-        model.add(layers.Dropout(fc_layers_dropout))
-        model.add(layers.Dense(fc_layers_size, activation='relu'))
+    if fc_layers_nb:
+        for i in range(fc_layers_nb):
+            if fc_layers_dropout:
+                model.add(layers.Dropout(fc_layers_dropout))
+            model.add(layers.Dense(fc_layers_size, activation='relu'))
     
-    ### Classification layers
-    model.add(layers.Dropout(classif_layer_dropout))
+    ### Classification layer
+    if classif_layer_dropout:
+        model.add(layers.Dropout(classif_layer_dropout))
     model.add(layers.Dense(classif_layer_size))
     
     if glimpse:

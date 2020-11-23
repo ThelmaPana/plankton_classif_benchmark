@@ -114,20 +114,24 @@ def check_cnn():
         'cnn > data > use_weights should be a boolean'
     
     # architecture
-    assert isinstance(settings['architecture']['fc_layers_nb'], int) and \
-        (settings['architecture']['fc_layers_nb'] > 0), \
-        'cnn > architecture > fc_layers_nb should be a positive integer'
-    assert isinstance(settings['architecture']['fc_layers_size'], int) and \
-        (settings['architecture']['fc_layers_size'] > 0), \
-        'cnn > architecture > fc_layers_size should be a positive integer'
-    assert isinstance(settings['architecture']['fc_layers_dropout'], float) and \
+    assert (isinstance(settings['architecture']['fc_layers_nb'], int) and \
+        (settings['architecture']['fc_layers_nb'] > 0)) or \
+        (settings['architecture']['fc_layers_nb'] is None), \
+        'cnn > architecture > fc_layers_nb should be a positive integer or null'
+    assert (isinstance(settings['architecture']['fc_layers_size'], int) and \
+        (settings['architecture']['fc_layers_size'] > 0)) or \
+        (settings['architecture']['fc_layers_size'] is None), \
+        'cnn > architecture > fc_layers_size should be a positive integer or null'
+    assert (isinstance(settings['architecture']['fc_layers_dropout'], float) and \
         (settings['architecture']['fc_layers_dropout'] >= 0) and \
-        (settings['architecture']['fc_layers_dropout'] < 1), \
-        'cnn > architecture > fc_layers_dropout should be a float between 0 and 1'
-    assert isinstance(settings['architecture']['classif_layer_dropout'], float) and \
+        (settings['architecture']['fc_layers_dropout'] < 1)) or \
+        (settings['architecture']['fc_layers_dropout'] is None), \
+        'cnn > architecture > fc_layers_dropout should be a float between 0 and 1 or null'
+    assert (isinstance(settings['architecture']['classif_layer_dropout'], float) and \
         (settings['architecture']['classif_layer_dropout'] >= 0) and \
-        (settings['architecture']['classif_layer_dropout'] < 1), \
-        'cnn > architecture > classif_layer_dropout should be a float between 0 and 1'
+        (settings['architecture']['classif_layer_dropout'] < 1)) or \
+        (settings['architecture']['classif_layer_dropout'] is None), \
+        'cnn > architecture > classif_layer_dropout should be a float between 0 and 1 or null'
     assert isinstance(settings['architecture']['train_fe'], bool), \
         'cnn > architecture > train_fe should be a boolean'
     
