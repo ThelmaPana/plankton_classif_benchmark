@@ -71,7 +71,7 @@ n_estimators = rf_settings['hyperparameters']['n_estimators']
 ##################################################################################
 
 ## Read data for RF
-df_train, df_valid, df_test = datasets.read_data_rf(
+df_train, df_valid, df_test, df_classes = datasets.read_data_rf(
     path=os.path.join(data_dir, '_'.join([instrument, 'data.csv'])),
     split=split,
     n_max=n_max,
@@ -122,6 +122,7 @@ rf = models.train_rf(
 test_accuracy = models.predict_evaluate_rf(
     rf_model=rf, 
     df=df_test,
+    df_classes=df_classes,
     output_dir = output_dir
 )
 

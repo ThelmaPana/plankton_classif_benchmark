@@ -151,13 +151,14 @@ def train_rf(df, n_estimators, max_features, min_samples_leaf, n_jobs, random_st
     return rf
 
 
-def predict_evaluate_rf(rf_model, df, output_dir):
+def predict_evaluate_rf(rf_model, df, df_classes, output_dir):
     """
     Evaluate a random forest model.
     
     Args:
         rf_model (RandomForestClassifier): random forest model to evaluate
-        df (DataFrame): data to use for evaluation
+        df (DataFrame): data to use for model evaluation
+        df_classes (DataFrame): dataframe of classes with living attribute
         output_dir (str): directory where to save prediction results
     
     Returns:
@@ -172,9 +173,13 @@ def predict_evaluate_rf(rf_model, df, output_dir):
     X = df.drop('classif_id', axis=1)
     
     # Make a list of classes
-    classes = list(set(y))
+    classes = df_classes['classif_id'].tolist()
     classes.sort()
     classes = np.array(classes)
+    
+    # Make a list of living classes
+    living_classes = df_classes[df_classes['living']]['classif_id'].tolist()
+    living_classes = np.array(living_classes)
     
     # Predict test data
     y_pred = rf_model.predict(X)
@@ -182,16 +187,20 @@ def predict_evaluate_rf(rf_model, df, output_dir):
     # Compute accuracy between true labels and predicted labels
     accuracy = accuracy_score(y, y_pred)
     balanced_accuracy = balanced_accuracy_score(y, y_pred)
+    living_accuracy = biological_accuracy(y, y_pred, living_classes)
     print(f'Test accuracy = {accuracy}')
     print(f'Balanced test accuracy = {balanced_accuracy}')
+    print(f'Living accuracy = {living_accuracy}')
     
     # Write true and predicted classes and accuracy to test file
     with open(os.path.join(output_dir, 'test_results.pickle'),'wb') as test_file:
         pickle.dump({'true_classes': y,
                      'predicted_classes': y_pred,
                      'classes': classes,
+                     'living_classes': living_classes,
                      'accuracy': accuracy,
-                     'balanced_accuracy': balanced_accuracy},
+                     'balanced_accuracy': balanced_accuracy,
+                     'living_accuracy': living_accuracy},
                     test_file)
         
     return(accuracy)
@@ -412,3 +421,34 @@ def predict_evaluate_cnn(model, batches, classes, output_dir):
                     test_file)
         
     return accuracy, loss
+
+
+def biological_accuracy(y_true, y_pred, classes):
+    """
+    Compute accuracy for a set of classes (usually living classes) and ignoring others (non-living)
+    
+    Args:
+        y_true (1d array): true labels
+        y_pred (1d array): predicted labels
+        classes (1d array): list of classes to consider for accuracy computation
+
+    Returns:
+        bio_acc (float): accuracy computed only on living classes 
+        
+    """
+    # Initiate zero array for matches between true and pred labels
+    eq = np.zeros([len(y_true)])
+    # Initiate zero array for classes to include 
+    included = np.zeros([len(y_true)])
+    
+    # Loop over predictions
+    for i in range(len(y_true)):
+        # If true and predicted labels are identical, put a 1 in the match array
+        eq[i] = y_true[i] == y_pred[i]
+        # It true label is in living classes, put a one in array for classes to include
+        included[i] = y_true[i] in classes
+    
+    # Sum the element-wise multiplication between matches and classes to include and divide it by the number of included cases
+    bio_acc = np.sum(np.multiply(eq, included))/sum(included)
+
+    return bio_acc

@@ -27,9 +27,11 @@ def read_data_cnn(path, split=[70, 15, 15], n_max=None, random_state=None):
         df_test (DataFrame): testing data containing path to image and classif_id
     """
     
+    # Read CSV file
     df = pd.read_csv(path)
     
-    # TODO check that mandatory columns are present: 'object_id', 'classif_id', 'path_to_img'
+    # TODO check that mandatory columns are present: 'classif_id', living, 'path_to_img'
+    
     
     # The classifier is a CNN, keep 'classif_id', and 'path_to_img'
     df = df[['path_to_img', 'classif_id']]
@@ -231,14 +233,19 @@ def read_data_rf(path, split = [70, 15, 15], n_max=None, random_state=None):
         df_train (DataFrame): training data containing object features and classif_id
         df_val (DataFrame): validation data containing object features and classif_id
         df_test (DataFrame): testing data containing object features and classif_id
+        df_classes (DataFrame): classes with their living attribute
     """
     
+    # Read CSV file
     df = pd.read_csv(path)
     
-    # TODO check that mandatory columns are present: 'object_id', 'classif_id', 'path_to_img'
+    # TODO check that mandatory columns are present: 'classif_id', 'living', 'path_to_img'
+    
+    # Extract living attribute
+    df_classes = df[['classif_id', 'living']].drop_duplicates().sort_values('classif_id').reset_index(drop=True)
     
     # Delete columns 'path_to_img' 
-    df = df.drop(columns=['path_to_img'])
+    df = df.drop(columns=['path_to_img', 'living'])
     
     # Make a stratified sampling by classif_id
     y = df.pop('classif_id')
@@ -289,5 +296,5 @@ def read_data_rf(path, split = [70, 15, 15], n_max=None, random_state=None):
     if n_max:
         df_train = df_train.groupby('classif_id').apply(lambda x: x.sample(min(n_max,len(x)), random_state=random_state)).reset_index(drop=True)
      
-    return df_train, df_val, df_test
+    return df_train, df_val, df_test, df_classes
 
