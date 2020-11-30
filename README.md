@@ -19,6 +19,7 @@ Store your input data in `data/<instrument_name>`. Your data must contain an `im
 This csv file should contain the following columns:
 - `path_to_img`: path to image
 - `classif_id`: object classification
+- `living`: whether the classification in `classif_id` is living or not (boolean)
 - `features_1` to `features_n`: object features for random forest fit (choices for names of these columns are up to you)
 
 It is strongly recommended that each class contain at least 100 images. 
