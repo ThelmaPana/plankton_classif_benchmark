@@ -83,7 +83,7 @@ epochs = cnn_settings['training']['epochs']
 ##################################################################################
 
 ## Read data for CNN
-df_train, df_valid, df_test = datasets.read_data_cnn(
+df_train, df_valid, df_test, df_classes = datasets.read_data_cnn(
     path=os.path.join(data_dir, '_'.join([instrument, 'data.csv'])),
     split=split,
     n_max=n_max,
@@ -98,8 +98,7 @@ df_comp = pd.concat([
 df_comp.to_csv(os.path.join(output_dir, 'df_comp.csv'), index=True)
 
 # Number of plankton classes to predict
-nb_classes = df_train['classif_id'].nunique()
-classes = df_train['classif_id'].unique()
+nb_classes = len(df_classes)
 
 # Generate class weights
 class_weights = None
@@ -170,10 +169,10 @@ history = models.train_cnn(
 )
 
 ## Predict test batches and evaluate CNN
-accuracy, loss = models.predict_evaluate_cnn(
+test_accuracy, test_loss = models.predict_evaluate_cnn(
     model=my_cnn, 
     batches=test_batches, 
-    classes=classes, 
+    df_classes=df_classes, 
     output_dir=output_dir
 )
 
