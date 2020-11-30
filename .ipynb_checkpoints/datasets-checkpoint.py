@@ -117,6 +117,7 @@ class DataGenerator(utils.Sequence):
         return pad_value
     
     def augmenter(self, images):
+        'Define a data augmenter which doses horizontalf flip (50% chance), vertical flip (50% chance), zoom and shear'
         seq = iaa.Sequential(
             [
                 iaa.Fliplr(0.5),  # horizontally flip 50% of all images
@@ -124,11 +125,10 @@ class DataGenerator(utils.Sequence):
                 iaa.Affine(
                     scale={"x": (0.8, 1.2), "y": (0.8, 1.2)}, # scale images to 80-120% of their size, individually per axis
                     shear=(-15, 15),  # shear by -15 to +15 degrees
-                    mode='edge',
-                    #cval=(1), # pad images with white
+                    mode='edge', # pad images with border picels
                 ),
             ],
-            random_order=True
+            random_order=True # apply these transformations in random order
         )
         return seq(images=images)
 

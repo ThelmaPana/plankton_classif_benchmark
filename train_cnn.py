@@ -11,7 +11,7 @@ import datetime
 import numpy as np
 import read_settings
 import datasets
-import model_cnn
+import models
 import matplotlib.pyplot as plt
 import tensorflow as tf
 
@@ -139,7 +139,7 @@ for image_batch, label_batch in train_batches:
     break
 
 ## Generate CNN
-my_cnn = model_cnn.create_cnn(
+my_cnn = models.create_cnn(
     fc_layers_nb,
     fc_layers_dropout, 
     fc_layers_size, 
@@ -149,7 +149,7 @@ my_cnn = model_cnn.create_cnn(
     glimpse=True)
 
 ## Compile CNN
-my_cnn = model_cnn.compile_cnn(
+my_cnn = models.compile_cnn(
     my_cnn, 
     initial_lr, 
     steps_per_epoch=len(train_batches)//epochs, 
@@ -159,7 +159,7 @@ my_cnn = model_cnn.compile_cnn(
 )
 
 ## Train CNN
-history = model_cnn.train_cnn(
+history = models.train_cnn(
     model=my_cnn, 
     train_batches=train_batches, 
     valid_batches=valid_batches, 
@@ -170,7 +170,7 @@ history = model_cnn.train_cnn(
 )
 
 ## Predict test batches and evaluate CNN
-accuracy, loss = model_cnn.predict_evaluate_cnn(
+accuracy, loss = models.predict_evaluate_cnn(
     model=my_cnn, 
     batches=test_batches, 
     classes=classes, 

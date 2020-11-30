@@ -4,7 +4,7 @@ import os
 import glob
 import read_settings
 import datasets
-import model_rf
+import models
 import pandas as pd
 import tarfile
 import shutil
@@ -89,7 +89,7 @@ df_comp.to_csv(os.path.join(output_dir, 'df_comp.csv'), index=True)
 ## Grid search
 # Do grid serach
 if rf_settings['grid_search']['go']:
-    gs_results, best_params = model_rf.gridsearch_rf(
+    gs_results, best_params = models.gridsearch_rf(
         df_train, 
         df_valid, 
         max_features_try=max_features_try,
@@ -108,7 +108,7 @@ if rf_settings['grid_search']['go']:
 
 
 ## Fit the RF of training data
-rf = model_rf.train_rf(
+rf = models.train_rf(
     df=df_train, 
     n_estimators=n_estimators, 
     max_features=max_features, 
@@ -119,7 +119,7 @@ rf = model_rf.train_rf(
 
 
 ## Evaluate the RF on test data
-test_accuracy = model_rf.predict_evaluate_rf(
+test_accuracy = models.predict_evaluate_rf(
     rf_model=rf, 
     df=df_test,
     output_dir = output_dir
