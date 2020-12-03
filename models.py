@@ -187,9 +187,12 @@ def predict_evaluate_rf(rf_model, df, df_classes, output_dir):
     # Compute accuracy between true labels and predicted labels
     accuracy = accuracy_score(y, y_pred)
     balanced_accuracy = balanced_accuracy_score(y, y_pred)
+    living_precision = living_precision_score(y, y_pred, living_classes)
     living_recall = living_recall_score(y, y_pred, living_classes)
+    
     print(f'Test accuracy = {accuracy}')
     print(f'Balanced test accuracy = {balanced_accuracy}')
+    print(f'Living precision = {living_precision}')
     print(f'Living recall = {living_recall}')
     
     # Write true and predicted classes and accuracy to test file
@@ -200,6 +203,7 @@ def predict_evaluate_rf(rf_model, df, df_classes, output_dir):
                      'living_classes': living_classes,
                      'accuracy': accuracy,
                      'balanced_accuracy': balanced_accuracy,
+                     'living_precision': living_precision,
                      'living_recall': living_recall},
                     test_file)
         
@@ -411,14 +415,18 @@ def predict_evaluate_cnn(model, batches, df_classes, output_dir):
     predicted_classes = classes[np.argmax(predicted_batches, axis=1)]
     true_classes = classes[np.argmax(true_batches, axis=1)]
     
-    # Compute accuracy and loss from true labels and predicted labels
+    # Compute accuracy, precision and recall for living classes and loss from true labels and predicted labels
     accuracy = accuracy_score(true_classes, predicted_classes)
     balanced_accuracy = balanced_accuracy_score(true_classes, predicted_classes)
     living_recall = living_recall_score(true_classes, predicted_classes, living_classes)
+    living_precision = living_precision_score(true_classes, predicted_classes, living_classes)
     cce = losses.CategoricalCrossentropy()
     loss = cce(true_batches, predicted_batches).numpy()
+    
+    # Display results
     print(f'Test accuracy = {accuracy}')
     print(f'Balanced test accuracy = {balanced_accuracy}')
+    print(f'Living precision = {living_precision}')
     print(f'Living recall = {living_recall}')
     print(f'Test loss = {loss}')
     
@@ -430,6 +438,7 @@ def predict_evaluate_cnn(model, batches, df_classes, output_dir):
                      'living_classes': living_classes,
                      'accuracy': accuracy,
                      'balanced_accuracy': balanced_accuracy,
+                     'living_precision': living_precision,
                      'living_recall': living_recall},
                     test_file)
         
@@ -458,10 +467,41 @@ def living_recall_score(y_true, y_pred, classes):
     for i in range(len(y_true)):
         # If true and predicted labels are identical, put a 1 in the match array
         eq[i] = y_true[i] == y_pred[i]
-        # It true label is in living classes, put a one in array for classes to include
+        # If true label is in living classes, put a one in array for classes to include
         included[i] = y_true[i] in classes
     
     # Sum the element-wise multiplication between matches and classes to include and divide it by the number of included cases
-    bio_acc = np.sum(np.multiply(eq, included))/sum(included)
+    bio_recall = np.sum(np.multiply(eq, included))/sum(included)
 
-    return bio_acc
+    return bio_recall
+
+
+def living_precision_score(y_true, y_pred, classes):
+    """
+    Compute precision score for a set of classes (usually living classes) and ignoring others (non-living)
+    
+    Args:
+        y_true (1d array): true labels
+        y_pred (1d array): predicted labels
+        classes (1d array): list of classes to consider for precision computation
+
+    Returns:
+        bio_acc (float): accuracy computed only on living classes 
+        
+    """
+    # Initiate zero array for matches between true and pred labels
+    eq = np.zeros([len(y_true)])
+    # Initiate zero array for classes to include 
+    included = np.zeros([len(y_true)])
+    
+    # Loop over predictions
+    for i in range(len(y_true)):
+        # If true and predicted labels are identical, put a 1 in the match array
+        eq[i] = y_true[i] == y_pred[i]
+        # If predicted label is in living classes, put a one in array for classes to include
+        included[i] = y_pred[i] in classes
+    
+    # Sum the element-wise multiplication between matches and classes to include and divide it by the number of included cases
+    bio_precision = np.sum(np.multiply(eq, included))/sum(included)
+
+    return bio_precision
