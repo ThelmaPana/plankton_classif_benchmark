@@ -187,10 +187,10 @@ def predict_evaluate_rf(rf_model, df, df_classes, output_dir):
     # Compute accuracy between true labels and predicted labels
     accuracy = accuracy_score(y, y_pred)
     balanced_accuracy = balanced_accuracy_score(y, y_pred)
-    living_accuracy = biological_accuracy(y, y_pred, living_classes)
+    living_recall = living_recall_score(y, y_pred, living_classes)
     print(f'Test accuracy = {accuracy}')
     print(f'Balanced test accuracy = {balanced_accuracy}')
-    print(f'Living accuracy = {living_accuracy}')
+    print(f'Living recall = {living_recall}')
     
     # Write true and predicted classes and accuracy to test file
     with open(os.path.join(output_dir, 'test_results.pickle'),'wb') as test_file:
@@ -200,7 +200,7 @@ def predict_evaluate_rf(rf_model, df, df_classes, output_dir):
                      'living_classes': living_classes,
                      'accuracy': accuracy,
                      'balanced_accuracy': balanced_accuracy,
-                     'living_accuracy': living_accuracy},
+                     'living_recall': living_recall},
                     test_file)
         
     return(accuracy)
@@ -414,12 +414,12 @@ def predict_evaluate_cnn(model, batches, df_classes, output_dir):
     # Compute accuracy and loss from true labels and predicted labels
     accuracy = accuracy_score(true_classes, predicted_classes)
     balanced_accuracy = balanced_accuracy_score(true_classes, predicted_classes)
-    living_accuracy = biological_accuracy(true_classes, predicted_classes, living_classes)
+    living_recall = living_recall_score(true_classes, predicted_classes, living_classes)
     cce = losses.CategoricalCrossentropy()
     loss = cce(true_batches, predicted_batches).numpy()
     print(f'Test accuracy = {accuracy}')
     print(f'Balanced test accuracy = {balanced_accuracy}')
-    print(f'Living accuracy = {living_accuracy}')
+    print(f'Living recall = {living_recall}')
     print(f'Test loss = {loss}')
     
     # Write true and predicted classes to test file
@@ -430,20 +430,20 @@ def predict_evaluate_cnn(model, batches, df_classes, output_dir):
                      'living_classes': living_classes,
                      'accuracy': accuracy,
                      'balanced_accuracy': balanced_accuracy,
-                     'living_accuracy': living_accuracy},
+                     'living_recall': living_recall},
                     test_file)
         
     return accuracy, loss
 
 
-def biological_accuracy(y_true, y_pred, classes):
+def living_recall_score(y_true, y_pred, classes):
     """
-    Compute accuracy for a set of classes (usually living classes) and ignoring others (non-living)
+    Compute recall score for a set of classes (usually living classes) and ignoring others (non-living)
     
     Args:
         y_true (1d array): true labels
         y_pred (1d array): predicted labels
-        classes (1d array): list of classes to consider for accuracy computation
+        classes (1d array): list of classes to consider for recall computation
 
     Returns:
         bio_acc (float): accuracy computed only on living classes 
