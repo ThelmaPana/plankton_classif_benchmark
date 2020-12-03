@@ -15,7 +15,7 @@ from tensorflow.keras import layers, optimizers, losses, callbacks
 import tensorflow_addons as tfa
 
 
-def gridsearch_rf(df1, df2, max_features_try, min_samples_leaf_try, n_estimators_try, output_dir, n_jobs, random_state=None):
+def gridsearch_rf(df1, df2, max_features_try, min_samples_leaf_try, n_estimators_try, output_dir, n_jobs, class_weights=None, random_state=None):
     """
     Do a grid search to find best hyperparameters for random forest model, including number of estimators.
     
@@ -27,6 +27,7 @@ def gridsearch_rf(df1, df2, max_features_try, min_samples_leaf_try, n_estimators
         n_estimators (list): number of estimators (usually between 100 and 500)
         output_dir (str): directory where to save gridsearch results
         n_jobs (int): number of cores to use 
+        class_weights(dict): weights for classes
         random_state (int or RandomState): controls both the randomness of the bootstrapping and features sampling; default=None
     
     Returns:
@@ -74,6 +75,7 @@ def gridsearch_rf(df1, df2, max_features_try, min_samples_leaf_try, n_estimators
             min_samples_leaf=min_samples_leaf,
             warm_start=True,
             n_jobs=n_jobs,
+            class_weight=class_weights,
             random_state=random_state
         )
         
@@ -110,7 +112,7 @@ def gridsearch_rf(df1, df2, max_features_try, min_samples_leaf_try, n_estimators
     return results, best_params
 
 
-def train_rf(df, n_estimators, max_features, min_samples_leaf, n_jobs, random_state=None):
+def train_rf(df, n_estimators, max_features, min_samples_leaf, n_jobs, class_weights, random_state=None):
     """
     Fit a random forest model on data.
     
@@ -120,6 +122,7 @@ def train_rf(df, n_estimators, max_features, min_samples_leaf, n_jobs, random_st
         max_features (int): number of variables per node
         min_samples_leaf (int): min number of objects in leaf
         n_jobs (int): number of cores to use 
+        class_weights(dict): weights for classes
         random_state (int or RandomState): controls both the randomness of the bootstrapping and features sampling; default=None
     
     Returns:
@@ -142,6 +145,7 @@ def train_rf(df, n_estimators, max_features, min_samples_leaf, n_jobs, random_st
         min_samples_leaf=min_samples_leaf, 
         max_features=max_features,
         n_jobs=n_jobs,
+        class_weight=class_weights,
         random_state=random_state
     )
     

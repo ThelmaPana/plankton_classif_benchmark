@@ -58,6 +58,10 @@ def check_rf():
     assert isinstance(settings['n_jobs'], int), \
         'rf > n_jobs should be an integer'
     
+    # weights
+    assert isinstance(settings['use_weights'], bool), \
+        'rf > use_weights should be a boolean'
+    
     # gridsearch
     assert isinstance(settings['grid_search']['go'], bool), \
         'rf > grid_search > go should be a boolean'

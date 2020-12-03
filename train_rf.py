@@ -59,6 +59,7 @@ read_settings.write_rf_settings(global_settings, rf_settings, output_dir)
 
 # RF settings
 n_jobs = rf_settings['n_jobs'] 
+use_weights = rf_settings['use_weights'] 
 
 max_features_try = rf_settings['grid_search']['max_features_try']
 min_samples_leaf_try = rf_settings['grid_search']['min_samples_leaf_try']
@@ -85,7 +86,17 @@ df_comp = pd.concat([
 ], axis=0, ignore_index=True).groupby(['classif_id','split']).size().unstack(fill_value=0)
 df_comp.to_csv(os.path.join(output_dir, 'df_comp.csv'), index=True)
 
-
+# Generate class weights
+class_weights = None
+if use_weights:
+    class_counts = df_train.groupby('classif_id').size()
+    count_max = 0
+    class_weights = {}
+    for idx in class_counts.items():
+        count_max = (idx[1], count_max) [idx[1] < count_max]
+    for i,idx in enumerate(class_counts.items()):
+        class_weights.update({idx[0] : count_max / idx[1]})
+        
 ## Grid search
 # Do grid serach
 if rf_settings['grid_search']['go']:
@@ -97,6 +108,7 @@ if rf_settings['grid_search']['go']:
         n_estimators_try=n_estimators_try,
         output_dir=output_dir,
         n_jobs=n_jobs,
+        class_weights=class_weights,
         random_state=random_state
     )
     
@@ -114,6 +126,7 @@ rf = models.train_rf(
     max_features=max_features, 
     min_samples_leaf=min_samples_leaf, 
     n_jobs=n_jobs, 
+    class_weights=class_weights,
     random_state=random_state
 )
 
@@ -123,7 +136,7 @@ test_accuracy = models.predict_evaluate_rf(
     rf_model=rf, 
     df=df_test,
     df_classes=df_classes,
-    output_dir = output_dir
+    output_dir=output_dir
 )
 
 
