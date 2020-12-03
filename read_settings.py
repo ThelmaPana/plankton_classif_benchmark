@@ -34,9 +34,9 @@ def check_global():
         'global > input_data > split should sum to 100'
     
     # n_max
-    assert isinstance(settings['input_data']['n_max'], int) and \
+    assert (settings['input_data']['n_max'] is None) or isinstance(settings['input_data']['n_max'], int) and \
         (settings['input_data']['n_max'] > 0), \
-        'global > input_data > n_max should be a positive integer'
+        'global > input_data > n_max should be none or a positive integer'
     
     return settings
 
