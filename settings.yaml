@@ -14,6 +14,7 @@ global:
 # Random Forest
 rf:
   n_jobs: 6 # number of cores to use for random forest fitting
+  use_weights: true # whether to use class weights for training
   grid_search:
     go: true # whether to do a gridsearch to find optimal hyperparameters
     max_features_try: [4, 6, 8, 10] # values to try for max_features, i.e. number of features to use to compute each split (default for classification is sqrt(n_features))
@@ -48,4 +49,4 @@ cnn:
     loss: 'cce' # computation of loss. 'cce' for categorical cross entropy; 'sfce' for sigmoid focal cross entropy.
 
   training:
-    epochs: 200 # number of epochs to train for
+    epochs: 10 # number of epochs to train for
