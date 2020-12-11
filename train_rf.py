@@ -46,7 +46,7 @@ if use_weights: # if using weigths
 else: # if not using weigths 
     output_dir_patt = os.path.join('output', '_'.join(['rf', 'nw', instrument]))
 
-# Look for previous output with same pattern
+# Look for previous outputs with same pattern
 prev_output = glob.glob(output_dir_patt + '*')
 # If an previous output exists, make a tar.gz archive
 if prev_output:
