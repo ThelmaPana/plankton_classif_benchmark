@@ -29,11 +29,36 @@ n_max = global_settings['input_data']['n_max']
 # Random state
 random_state = global_settings['random_state']
 
-# Output
-output_dir_pat = os.path.join('output', '_'.join(['cnn', instrument]))
+# CNN settings
+batch_size    = cnn_settings['data']['batch_size']
+px_del        = cnn_settings['data']['px_del']
+preserve_size = cnn_settings['data']['preserve_size']
+augment       = cnn_settings['data']['augment']
+use_weights   = cnn_settings['data']['use_weights']
 
-# Look for previous output
-prev_output = glob.glob(output_dir_pat + '*')
+fc_layers_nb          = cnn_settings['architecture']['fc_layers_nb']
+fc_layers_size        = cnn_settings['architecture']['fc_layers_size']
+fc_layers_dropout     = cnn_settings['architecture']['fc_layers_dropout']
+classif_layer_dropout = cnn_settings['architecture']['classif_layer_dropout']
+train_fe              = cnn_settings['architecture']['train_fe']
+
+lr_method  = cnn_settings['compilation']['lr_method']
+initial_lr = cnn_settings['compilation']['initial_lr']
+decay_rate = cnn_settings['compilation']['decay_rate']
+loss       = cnn_settings['compilation']['loss']
+
+epochs = cnn_settings['training']['epochs']
+
+
+## Output
+# Generate output directory pattern
+if use_weights: # if using weigths 
+    output_dir_patt = os.path.join('output', '_'.join(['cnn', 'w', instrument]))
+else: # if not using weigths 
+    output_dir_patt = os.path.join('output', '_'.join(['cnn', 'nw', instrument]))
+
+# Look for previous outputs with same pattern
+prev_output = glob.glob(output_dir_patt + '*')
 # If an previous output exists, make a tar.gz archive
 if prev_output:
     prev_output = prev_output[0]
@@ -54,31 +79,12 @@ if prev_output:
     shutil.move(prev_output + '.tar.gz', os.path.join(old_output_dir, os.path.basename(prev_output) + '.tar.gz'))
 
 # Create a new output directory
-output_dir = os.path.join('output', '_'.join(['cnn', instrument, datetime.datetime.now().strftime("%Y%m%d-%H%M%S-%f")]))
+output_dir = '_'.join([output_dir_patt, datetime.datetime.now().strftime("%Y%m%d-%H%M%S-%f")])
 os.mkdir(output_dir)
 
 # Write settings to output directory
 read_settings.write_cnn_settings(global_settings, cnn_settings, output_dir)
 
-# CNN settings
-batch_size    = cnn_settings['data']['batch_size']
-px_del        = cnn_settings['data']['px_del']
-preserve_size = cnn_settings['data']['preserve_size']
-augment       = cnn_settings['data']['augment']
-use_weights   = cnn_settings['data']['use_weights']
-
-fc_layers_nb          = cnn_settings['architecture']['fc_layers_nb']
-fc_layers_size        = cnn_settings['architecture']['fc_layers_size']
-fc_layers_dropout     = cnn_settings['architecture']['fc_layers_dropout']
-classif_layer_dropout = cnn_settings['architecture']['classif_layer_dropout']
-train_fe              = cnn_settings['architecture']['train_fe']
-
-lr_method  = cnn_settings['compilation']['lr_method']
-initial_lr = cnn_settings['compilation']['initial_lr']
-decay_rate = cnn_settings['compilation']['decay_rate']
-loss       = cnn_settings['compilation']['loss']
-
-epochs = cnn_settings['training']['epochs']
 
 ##################################################################################
 
