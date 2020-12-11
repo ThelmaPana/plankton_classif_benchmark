@@ -26,11 +26,28 @@ n_max = global_settings['input_data']['n_max']
 # Random state
 random_state = global_settings['random_state']
 
-# Output
-output_dir_pat = os.path.join('output', '_'.join(['rf', instrument]))
+# RF settings
+n_jobs = rf_settings['n_jobs'] 
+use_weights = rf_settings['use_weights'] 
 
-# Look for previous output
-prev_output = glob.glob(output_dir_pat + '*')
+max_features_try = rf_settings['grid_search']['max_features_try']
+min_samples_leaf_try = rf_settings['grid_search']['min_samples_leaf_try']
+n_estimators_try = rf_settings['grid_search']['n_estimators_try']
+
+max_features = rf_settings['hyperparameters']['max_features']
+min_samples_leaf = rf_settings['hyperparameters']['min_samples_leaf']
+n_estimators = rf_settings['hyperparameters']['n_estimators']
+
+
+## Output
+# Generate output directory pattern
+if use_weights: # if using weigths 
+    output_dir_patt = os.path.join('output', '_'.join(['rf', 'w', instrument]))
+else: # if not using weigths 
+    output_dir_patt = os.path.join('output', '_'.join(['rf', 'nw', instrument]))
+
+# Look for previous output with same pattern
+prev_output = glob.glob(output_dir_patt + '*')
 # If an previous output exists, make a tar.gz archive
 if prev_output:
     prev_output = prev_output[0]
@@ -51,24 +68,13 @@ if prev_output:
     shutil.move(prev_output + '.tar.gz', os.path.join(old_output_dir, os.path.basename(prev_output) + '.tar.gz'))
 
 # Create a new output directory
-output_dir = os.path.join('output', '_'.join(['rf', instrument, datetime.datetime.now().strftime("%Y%m%d-%H%M%S-%f")]))
+output_dir = '_'.join([output_dir_patt, datetime.datetime.now().strftime("%Y%m%d-%H%M%S-%f")])
 os.mkdir(output_dir)
 
 # Write settings to output directory
 read_settings.write_rf_settings(global_settings, rf_settings, output_dir)
 
-# RF settings
-n_jobs = rf_settings['n_jobs'] 
-use_weights = rf_settings['use_weights'] 
 
-max_features_try = rf_settings['grid_search']['max_features_try']
-min_samples_leaf_try = rf_settings['grid_search']['min_samples_leaf_try']
-n_estimators_try = rf_settings['grid_search']['n_estimators_try']
-
-max_features = rf_settings['hyperparameters']['max_features']
-min_samples_leaf = rf_settings['hyperparameters']['min_samples_leaf']
-n_estimators = rf_settings['hyperparameters']['n_estimators']
-        
 ##################################################################################
 
 ## Read data for RF
