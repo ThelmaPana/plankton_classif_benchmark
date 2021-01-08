@@ -237,7 +237,8 @@ def create_cnn(fc_layers_nb, fc_layers_dropout, fc_layers_size, classif_layer_dr
     model = tf.keras.Sequential()
     
     ## MobileNet V2 feature extractor
-    fe_url = "https://tfhub.dev/google/tf2-preview/mobilenet_v2/feature_vector/4"
+    #fe_url = "https://tfhub.dev/google/tf2-preview/mobilenet_v2/feature_vector/4"
+    fe_url = "https://tfhub.dev/google/imagenet/mobilenet_v2_140_224/feature_vector/4"
     fe_layer = hub.KerasLayer(fe_url, input_shape=(224, 224, 3))
     # Set feature extractor trainability
     fe_layer.trainable=train_fe
@@ -459,7 +460,7 @@ def living_recall_score(y_true, y_pred, classes):
         classes (1d array): list of classes to consider for recall computation
 
     Returns:
-        bio_acc (float): accuracy computed only on living classes 
+        bio_recall (float): accuracy computed only on living classes 
         
     """
     # Initiate zero array for matches between true and pred labels
@@ -490,7 +491,7 @@ def living_precision_score(y_true, y_pred, classes):
         classes (1d array): list of classes to consider for precision computation
 
     Returns:
-        bio_acc (float): accuracy computed only on living classes 
+        bio_precision (float): accuracy computed only on living classes 
         
     """
     # Initiate zero array for matches between true and pred labels
