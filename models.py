@@ -393,8 +393,8 @@ def predict_evaluate_cnn(model, batches, df_classes, output_dir):
     model.load_weights(saved_weights[-1])
     
     # Initiate empty lists for predicted and true labels
-    predicted_batches = []
-    true_batches = []
+    predicted_labels = []
+    true_labels = []
     
     # Loop over test batches
 #    for image_batch, label_batch in batches:
@@ -412,13 +412,15 @@ def predict_evaluate_cnn(model, batches, df_classes, output_dir):
         # if batch is not empty, predict it
         if len(image_batch) > 0:
             # Predict images of batch
-            predicted_batches.extend(model.predict(image_batch))
-            # Extract true labels of batch
-            true_batches.extend(label_batch)
+            predicted_batch = model.predict(image_batch)
+            # And add predictions to list of predicted batches
+            predicted_labels.extend(np.argmax(predicted_batch, axis=1))
+            # Extract true labels of batch and add to list of true batches
+            true_labels.extend(np.argmax(label_batch, axis=1))
     
     # Convert to class names
-    predicted_classes = classes[np.argmax(predicted_batches, axis=1)]
-    true_classes = classes[np.argmax(true_batches, axis=1)]
+    predicted_classes = classes[predicted_labels]
+    true_classes = classes[true_labels]
     
     # Compute accuracy, precision and recall for living classes and loss from true labels and predicted labels
     accuracy = accuracy_score(true_classes, predicted_classes)
