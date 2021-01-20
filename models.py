@@ -425,15 +425,12 @@ def predict_evaluate_cnn(model, batches, df_classes, output_dir):
     balanced_accuracy = balanced_accuracy_score(true_classes, predicted_classes)
     living_recall = living_recall_score(true_classes, predicted_classes, living_classes)
     living_precision = living_precision_score(true_classes, predicted_classes, living_classes)
-    cce = losses.CategoricalCrossentropy()
-    loss = cce(true_batches, predicted_batches).numpy()
     
     # Display results
     print(f'Test accuracy = {accuracy}')
     print(f'Balanced test accuracy = {balanced_accuracy}')
     print(f'Living precision = {living_precision}')
     print(f'Living recall = {living_recall}')
-    print(f'Test loss = {loss}')
     
     # Write true and predicted classes to test file
     with open(os.path.join(output_dir, 'test_results.pickle'),'wb') as test_file:
@@ -447,7 +444,7 @@ def predict_evaluate_cnn(model, batches, df_classes, output_dir):
                      'living_recall': living_recall},
                     test_file)
         
-    return accuracy, loss
+    return accuracy
 
 
 def living_recall_score(y_true, y_pred, classes):

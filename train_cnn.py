@@ -175,7 +175,7 @@ history = models.train_cnn(
 )
 
 ## Predict test batches and evaluate CNN
-test_accuracy, test_loss = models.predict_evaluate_cnn(
+test_accuracy = models.predict_evaluate_cnn(
     model=my_cnn, 
     batches=test_batches, 
     df_classes=df_classes, 
