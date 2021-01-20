@@ -373,8 +373,7 @@ def predict_evaluate_cnn(model, batches, df_classes, output_dir):
 
     
     Returns:
-        accuracy (float) accuracy value for test data
-        loss (float): loss (categorical cross entropy) value for test data
+        Nothing
         
     """
 
@@ -446,8 +445,6 @@ def predict_evaluate_cnn(model, batches, df_classes, output_dir):
                      'living_recall': living_recall},
                     test_file)
         
-    return accuracy
-
 
 def living_recall_score(y_true, y_pred, classes):
     """
