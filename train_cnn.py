@@ -182,4 +182,3 @@ models.predict_evaluate_cnn(
     output_dir=output_dir
 )
 
-

@@ -6,7 +6,7 @@ import pickle
 import glob
 
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import accuracy_score, balanced_accuracy_score
+from sklearn.metrics import accuracy_score, balanced_accuracy_score, precision_recall_fscore_support
 
 import tensorflow as tf
 import tensorflow_hub as hub
@@ -424,8 +424,7 @@ def predict_evaluate_cnn(model, batches, df_classes, output_dir):
     # Compute accuracy, precision and recall for living classes and loss from true labels and predicted labels
     accuracy = accuracy_score(true_classes, predicted_classes)
     balanced_accuracy = balanced_accuracy_score(true_classes, predicted_classes)
-    living_recall = living_recall_score(true_classes, predicted_classes, living_classes)
-    living_precision = living_precision_score(true_classes, predicted_classes, living_classes)
+    living_precision, living_recall = living_precision_recall_score(true_classes, predicted_classes, living_classes)
     
     # Display results
     print(f'Test accuracy = {accuracy}')
@@ -444,65 +443,26 @@ def predict_evaluate_cnn(model, batches, df_classes, output_dir):
                      'living_precision': living_precision,
                      'living_recall': living_recall},
                     test_file)
-        
 
-def living_recall_score(y_true, y_pred, classes):
+
+def living_precision_recall_score(y_true, y_pred, classes):
     """
-    Compute recall score for a set of classes (usually living classes) and ignoring others (non-living)
+    Compute precision and recall score for a set of classes (usually living classes) and ignoring others (non-living)
     
     Args:
         y_true (1d array): true labels
         y_pred (1d array): predicted labels
         classes (1d array): list of classes to consider for recall computation
-
     Returns:
-        bio_recall (float): accuracy computed only on living classes 
+        living_precision (float): precision computed only on living classes 
+        living_recall (float): recall computed only on living classes 
         
     """
-    # Initiate zero array for matches between true and pred labels
-    eq = np.zeros([len(y_true)])
-    # Initiate zero array for classes to include 
-    included = np.zeros([len(y_true)])
+    # Convert elements of true and predicted classes to 'living' or 'non living'
+    liv_true = ['living' if y in classes else 'non living' for y in y_true]
+    liv_pred = ['living' if y in classes else 'non living' for y in y_pred]
     
-    # Loop over predictions
-    for i in range(len(y_true)):
-        # If true and predicted labels are identical, put a 1 in the match array
-        eq[i] = y_true[i] == y_pred[i]
-        # If true label is in living classes, put a one in array for classes to include
-        included[i] = y_true[i] in classes
+    # Compute accuracy and recall
+    living_precision, living_recall, _, _ = precision_recall_fscore_support(liv_true, liv_pred, pos_label='living', average = 'binary')
     
-    # Sum the element-wise multiplication between matches and classes to include and divide it by the number of included cases
-    bio_recall = np.sum(np.multiply(eq, included))/sum(included)
-
-    return bio_recall
-
-
-def living_precision_score(y_true, y_pred, classes):
-    """
-    Compute precision score for a set of classes (usually living classes) and ignoring others (non-living)
-    
-    Args:
-        y_true (1d array): true labels
-        y_pred (1d array): predicted labels
-        classes (1d array): list of classes to consider for precision computation
-
-    Returns:
-        bio_precision (float): accuracy computed only on living classes 
-        
-    """
-    # Initiate zero array for matches between true and pred labels
-    eq = np.zeros([len(y_true)])
-    # Initiate zero array for classes to include 
-    included = np.zeros([len(y_true)])
-    
-    # Loop over predictions
-    for i in range(len(y_true)):
-        # If true and predicted labels are identical, put a 1 in the match array
-        eq[i] = y_true[i] == y_pred[i]
-        # If predicted label is in living classes, put a one in array for classes to include
-        included[i] = y_pred[i] in classes
-    
-    # Sum the element-wise multiplication between matches and classes to include and divide it by the number of included cases
-    bio_precision = np.sum(np.multiply(eq, included))/sum(included)
-
-    return bio_precision
+    return living_precision, living_recall
