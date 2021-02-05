@@ -30,7 +30,7 @@ Data will be split into training, validation and testing sets.
 ### Convolutional Neural Network
 A convolutional neural network takes an image as input and predicts a class for this image. 
 
-The CNN backbone is a MobileNetV2 feature extractor (https://tfhub.dev/google/tf2-preview/mobilenet_v2/feature_vector/4) with depth multiplier of 1.
+The CNN backbone is a MobileNetV2 feature extractor (https://tfhub.dev/google/imagenet/mobilenet_v2_140_224/feature_vector/4) with depth multiplier of 1.4.
 A classification head with the number of classes to predict is added on top of the backbone. Intermediate fully connected layers with customizable dropout rate can be inserted between both.  
 
 Input images are expected to have color values in the range [0,1] and a size of 224 x 224 pixels. If need be, images are automatically resized by the CNN DataGenerator.

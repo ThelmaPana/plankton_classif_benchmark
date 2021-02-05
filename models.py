@@ -237,7 +237,6 @@ def create_cnn(fc_layers_nb, fc_layers_dropout, fc_layers_size, classif_layer_dr
     model = tf.keras.Sequential()
     
     ## MobileNet V2 feature extractor
-    #fe_url = "https://tfhub.dev/google/tf2-preview/mobilenet_v2/feature_vector/4"
     fe_url = "https://tfhub.dev/google/imagenet/mobilenet_v2_140_224/feature_vector/4"
     fe_layer = hub.KerasLayer(fe_url, input_shape=(224, 224, 3))
     # Set feature extractor trainability
