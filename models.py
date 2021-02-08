@@ -191,8 +191,7 @@ def predict_evaluate_rf(rf_model, df, df_classes, output_dir):
     # Compute accuracy between true labels and predicted labels
     accuracy = accuracy_score(y, y_pred)
     balanced_accuracy = balanced_accuracy_score(y, y_pred)
-    living_precision = living_precision_score(y, y_pred, living_classes)
-    living_recall = living_recall_score(y, y_pred, living_classes)
+    living_precision, living_recall = living_precision_recall_score(y, y_pred, living_classes)
     
     print(f'Test accuracy = {accuracy}')
     print(f'Balanced test accuracy = {balanced_accuracy}')
@@ -365,7 +364,7 @@ def predict_evaluate_cnn(model, batches, df_classes, output_dir):
     Predict batches and evaluate a CNN model by computing accuracy and loss and writting predictions and accuracy into a test file. 
     
     Args:
-        model (tensorflow.python.keras.engine.sequential.Sequential): CNN model to eavluate
+        model (tensorflow.python.keras.engine.sequential.Sequential): CNN model to evaiiluate
         batches (datasets.DataGenerator): batches of data to predict
         df_classes (DataFrame): dataframe of classes with living attribute
         output_dir (str): directory where to save prediction results

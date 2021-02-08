@@ -9,6 +9,7 @@ import tarfile
 import shutil
 import datetime
 import numpy as np
+import math
 import read_settings
 import datasets
 import models
@@ -35,6 +36,7 @@ px_del        = cnn_settings['data']['px_del']
 preserve_size = cnn_settings['data']['preserve_size']
 augment       = cnn_settings['data']['augment']
 use_weights   = cnn_settings['data']['use_weights']
+weights       = cnn_settings['data']['weights']
 
 fc_layers_nb          = cnn_settings['architecture']['fc_layers_nb']
 fc_layers_size        = cnn_settings['architecture']['fc_layers_size']
@@ -115,7 +117,10 @@ if use_weights:
     for idx in class_counts.items():
         count_max = (idx[1], count_max) [idx[1] < count_max]
     for i,idx in enumerate(class_counts.items()):
-        class_weights.update({i : count_max / idx[1]})
+        if weights == 'i_f': # Weights computed with inverse frequency
+            class_weights.update({i : count_max / idx[1]})
+        elif weights == 'sqrt_i_f': # # Weights computed with square root of inverse frequency
+            class_weights.update({i : math.sqrt(count_max / idx[1])})
 
 
 ## Generate batches
@@ -181,4 +186,3 @@ models.predict_evaluate_cnn(
     df_classes=df_classes, 
     output_dir=output_dir
 )
-

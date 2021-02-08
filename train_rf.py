@@ -6,6 +6,7 @@ import read_settings
 import datasets
 import models
 import pandas as pd
+import math
 import tarfile
 import shutil
 import datetime
@@ -27,16 +28,17 @@ n_max = global_settings['input_data']['n_max']
 random_state = global_settings['random_state']
 
 # RF settings
-n_jobs = rf_settings['n_jobs'] 
+n_jobs      = rf_settings['n_jobs'] 
 use_weights = rf_settings['use_weights'] 
+weights     = rf_settings['weights']
 
-max_features_try = rf_settings['grid_search']['max_features_try']
+max_features_try     = rf_settings['grid_search']['max_features_try']
 min_samples_leaf_try = rf_settings['grid_search']['min_samples_leaf_try']
-n_estimators_try = rf_settings['grid_search']['n_estimators_try']
+n_estimators_try     = rf_settings['grid_search']['n_estimators_try']
 
-max_features = rf_settings['hyperparameters']['max_features']
+max_features     = rf_settings['hyperparameters']['max_features']
 min_samples_leaf = rf_settings['hyperparameters']['min_samples_leaf']
-n_estimators = rf_settings['hyperparameters']['n_estimators']
+n_estimators     = rf_settings['hyperparameters']['n_estimators']
 
 
 ## Output
@@ -101,7 +103,10 @@ if use_weights:
     for idx in class_counts.items():
         count_max = (idx[1], count_max) [idx[1] < count_max]
     for i,idx in enumerate(class_counts.items()):
-        class_weights.update({idx[0] : count_max / idx[1]})
+        if weights == 'i_f':
+            class_weights.update({idx[0] : count_max / idx[1]})
+        elif weights == 'sqrt_i_f':
+            class_weights.update({idx[0] : math.sqrt(count_max / idx[1])})
         
 ## Grid search
 # Do grid serach
@@ -144,5 +149,3 @@ test_accuracy = models.predict_evaluate_rf(
     df_classes=df_classes,
     output_dir=output_dir
 )
-
-

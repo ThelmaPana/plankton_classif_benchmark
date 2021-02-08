@@ -7,14 +7,15 @@ global:
     
     # Input data
     input_data:
-      instrument: 'isiis' # name of the instrument. 
+      instrument: 'flowcam' # name of the instrument. 
       split: [70, 15, 15] # split for training / validation / test. Sum should equal 100.
-      n_max: 1000 # maximum number of objects in each class for training data
+      n_max: null # maximum number of objects in each class for training data
 
 # Random Forest
 rf:
   n_jobs: 6 # number of cores to use for random forest fitting
   use_weights: true # whether to use class weights for training
+  weights: 'sqrt_i_f' # method for weights computation. 'i_f' for inverse frequency, 'sqrt_i_f' for square root of inverse frequency
   grid_search:
     go: true # whether to do a gridsearch to find optimal hyperparameters
     max_features_try: [4, 6, 8, 10] # values to try for max_features, i.e. number of features to use to compute each split (default for classification is sqrt(n_features))
@@ -33,7 +34,8 @@ cnn:
     preserve_size: false # whether to perserve size of organisms when images are resized for cnn input.
     # If true, small images will be padded to desired size; if false, small images will be resized to desired size. 
     augment: false # wheter to use data augmentation for training
-    use_weights: false # whether to use class weights for training
+    use_weights: true # whether to use class weights for training
+    weights: 'sqrt_i_f' # method for weights computation. 'i_f' for inverse frequency, 'sqrt_i_f' for square root of inverse frequency
   
   architecture:
     fc_layers_nb: null # number of fully connected layers to insert between the feature extractor and the classification clayer
@@ -49,4 +51,4 @@ cnn:
     loss: 'cce' # computation of loss. 'cce' for categorical cross entropy; 'sfce' for sigmoid focal cross entropy.
 
   training:
-    epochs: 10 # number of epochs to train for
+    epochs: 30 # number of epochs to train for

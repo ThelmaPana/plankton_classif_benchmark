@@ -61,6 +61,10 @@ def check_rf():
     # weights
     assert isinstance(settings['use_weights'], bool), \
         'rf > use_weights should be a boolean'
+    if settings['use_weights']:
+        assert isinstance(settings['weights'], str) and \
+            settings['weights'] in ['i_f', 'sqrt_i_f'], \
+            'rf > weights should be "i_f" or "sqrt_i_f"'
     
     # gridsearch
     assert isinstance(settings['grid_search']['go'], bool), \
@@ -116,6 +120,10 @@ def check_cnn():
         'cnn > data > augment should be a boolean'
     assert isinstance(settings['data']['use_weights'], bool), \
         'cnn > data > use_weights should be a boolean'
+    if settings['data']['use_weights']:
+        assert isinstance(settings['data']['weights'], str) and \
+            settings['data']['weights'] in ['i_f', 'sqrt_i_f'], \
+            'cnn > data > weights should be "i_f" or "sqrt_i_f"'
     
     # architecture
     assert (isinstance(settings['architecture']['fc_layers_nb'], int) and \
@@ -142,16 +150,16 @@ def check_cnn():
     # compilation
     assert isinstance(settings['compilation']['lr_method'], str) and \
         settings['compilation']['lr_method'] in ['decay', 'constant'], \
-        'cnn > compilation > lr_method should be "decay" on "constant"'
+        'cnn > compilation > lr_method should be "decay" or "constant"'
     assert isinstance(settings['compilation']['initial_lr'], float) and \
         (settings['compilation']['initial_lr'] > 0) and \
         (settings['compilation']['initial_lr'] < 1), \
-        'cnn > compilation > initial_lr should be an float between 0 and 1'
+        'cnn > compilation > initial_lr should be a float between 0 and 1'
     if settings['compilation']['lr_method'] == 'decay': 
         assert isinstance(settings['compilation']['decay_rate'], float) and \
             (settings['compilation']['decay_rate'] > 0) and \
             (settings['compilation']['decay_rate'] < 1), \
-            'cnn > compilation > decay_rate should be an float between 0 and 1'
+            'cnn > compilation > decay_rate should be a float between 0 and 1'
     assert isinstance(settings['compilation']['loss'], str)and \
         settings['compilation']['loss'] in ['cce', 'sfce'], \
         'cnn > compilation > loss should be "cce" or "sfce"'
