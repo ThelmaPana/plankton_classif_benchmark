@@ -107,7 +107,7 @@ if use_weights:
             class_weights.update({idx[0] : count_max / idx[1]})
         elif weights == 'sqrt_i_f':
             class_weights.update({idx[0] : math.sqrt(count_max / idx[1])})
-        
+    
 ## Grid search
 # Do grid serach
 if rf_settings['grid_search']['go']:

@@ -191,12 +191,9 @@ def predict_evaluate_rf(rf_model, df, df_classes, output_dir):
     # Compute accuracy between true labels and predicted labels
     accuracy = accuracy_score(y, y_pred)
     balanced_accuracy = balanced_accuracy_score(y, y_pred)
-    living_precision, living_recall = living_precision_recall_score(y, y_pred, living_classes)
     
     print(f'Test accuracy = {accuracy}')
     print(f'Balanced test accuracy = {balanced_accuracy}')
-    print(f'Living precision = {living_precision}')
-    print(f'Living recall = {living_recall}')
     
     # Write true and predicted classes and accuracy to test file
     with open(os.path.join(output_dir, 'test_results.pickle'),'wb') as test_file:
@@ -205,9 +202,7 @@ def predict_evaluate_rf(rf_model, df, df_classes, output_dir):
                      'classes': classes,
                      'living_classes': living_classes,
                      'accuracy': accuracy,
-                     'balanced_accuracy': balanced_accuracy,
-                     'living_precision': living_precision,
-                     'living_recall': living_recall},
+                     'balanced_accuracy': balanced_accuracy},
                     test_file)
         
     return(accuracy)
@@ -325,7 +320,6 @@ def train_cnn(model, train_batches, valid_batches, batch_size, epochs, class_wei
         nothing
         
     """
-    #TODO add class weights
     # Set callbacks
     filepath = os.path.join(output_dir, "weights.{epoch:02d}.hdf5")
     cp_callback = callbacks.ModelCheckpoint(
@@ -422,13 +416,10 @@ def predict_evaluate_cnn(model, batches, df_classes, output_dir):
     # Compute accuracy, precision and recall for living classes and loss from true labels and predicted labels
     accuracy = accuracy_score(true_classes, predicted_classes)
     balanced_accuracy = balanced_accuracy_score(true_classes, predicted_classes)
-    living_precision, living_recall = living_precision_recall_score(true_classes, predicted_classes, living_classes)
     
     # Display results
     print(f'Test accuracy = {accuracy}')
     print(f'Balanced test accuracy = {balanced_accuracy}')
-    print(f'Living precision = {living_precision}')
-    print(f'Living recall = {living_recall}')
     
     # Write true and predicted classes to test file
     with open(os.path.join(output_dir, 'test_results.pickle'),'wb') as test_file:
@@ -437,30 +428,6 @@ def predict_evaluate_cnn(model, batches, df_classes, output_dir):
                      'classes': classes,
                      'living_classes': living_classes,
                      'accuracy': accuracy,
-                     'balanced_accuracy': balanced_accuracy,
-                     'living_precision': living_precision,
-                     'living_recall': living_recall},
+                     'balanced_accuracy': balanced_accuracy},
                     test_file)
 
-
-def living_precision_recall_score(y_true, y_pred, classes):
-    """
-    Compute precision and recall score for a set of classes (usually living classes) and ignoring others (non-living)
-    
-    Args:
-        y_true (1d array): true labels
-        y_pred (1d array): predicted labels
-        classes (1d array): list of classes to consider for recall computation
-    Returns:
-        living_precision (float): precision computed only on living classes 
-        living_recall (float): recall computed only on living classes 
-        
-    """
-    # Convert elements of true and predicted classes to 'living' or 'non living'
-    liv_true = ['living' if y in classes else 'non living' for y in y_true]
-    liv_pred = ['living' if y in classes else 'non living' for y in y_pred]
-    
-    # Compute accuracy and recall
-    living_precision, living_recall, _, _ = precision_recall_fscore_support(liv_true, liv_pred, pos_label='living', average = 'binary')
-    
-    return living_precision, living_recall
