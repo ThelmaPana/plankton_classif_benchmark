@@ -6,7 +6,7 @@ import pickle
 import glob
 
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import accuracy_score, balanced_accuracy_score, precision_recall_fscore_support
+from sklearn.metrics import accuracy_score, balanced_accuracy_score, precision_score, recall_score
 
 import tensorflow as tf
 import tensorflow_hub as hub
@@ -191,9 +191,13 @@ def predict_evaluate_rf(rf_model, df, df_classes, output_dir):
     # Compute accuracy between true labels and predicted labels
     accuracy = accuracy_score(y, y_pred)
     balanced_accuracy = balanced_accuracy_score(y, y_pred)
+    living_precision = precision_score(y, y_pred, labels=living_classes, average='weighted', zero_division=0)
+    living_recall = recall_score(y, y_pred, labels=living_classes, average='weighted', zero_division=0)
     
     print(f'Test accuracy = {accuracy}')
     print(f'Balanced test accuracy = {balanced_accuracy}')
+    print(f'Weighted living precision = {living_precision}')
+    print(f'Weighted living recall = {living_recall}')
     
     # Write true and predicted classes and accuracy to test file
     with open(os.path.join(output_dir, 'test_results.pickle'),'wb') as test_file:
@@ -202,7 +206,10 @@ def predict_evaluate_rf(rf_model, df, df_classes, output_dir):
                      'classes': classes,
                      'living_classes': living_classes,
                      'accuracy': accuracy,
-                     'balanced_accuracy': balanced_accuracy},
+                     'balanced_accuracy': balanced_accuracy,
+                     'living_precision': living_precision,
+                     'living_recall': living_recall,
+                    },
                     test_file)
         
     return(accuracy)
@@ -416,10 +423,14 @@ def predict_evaluate_cnn(model, batches, df_classes, output_dir):
     # Compute accuracy, precision and recall for living classes and loss from true labels and predicted labels
     accuracy = accuracy_score(true_classes, predicted_classes)
     balanced_accuracy = balanced_accuracy_score(true_classes, predicted_classes)
+    living_precision = precision_score(true_classes, predicted_classes, labels=living_classes, average='weighted', zero_division=0)
+    living_recall = recall_score(true_classes, predicted_classes, labels=living_classes, average='weighted', zero_division=0)
     
     # Display results
     print(f'Test accuracy = {accuracy}')
     print(f'Balanced test accuracy = {balanced_accuracy}')
+    print(f'Weighted living precision = {living_precision}')
+    print(f'Weighted living recall = {living_recall}')
     
     # Write true and predicted classes to test file
     with open(os.path.join(output_dir, 'test_results.pickle'),'wb') as test_file:
@@ -428,6 +439,9 @@ def predict_evaluate_cnn(model, batches, df_classes, output_dir):
                      'classes': classes,
                      'living_classes': living_classes,
                      'accuracy': accuracy,
-                     'balanced_accuracy': balanced_accuracy},
+                     'balanced_accuracy': balanced_accuracy,
+                     'living_precision': living_precision,
+                     'living_recall': living_recall,
+                    },
                     test_file)
 
