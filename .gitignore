@@ -3,3 +3,6 @@ output*/*
 draft.py
 .ipynb_checkpoints
 __pycache__
+.Rproj.user
+*.R
+*.Rproj
