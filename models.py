@@ -10,6 +10,7 @@ from sklearn.metrics import accuracy_score, balanced_accuracy_score, precision_s
 
 import tensorflow as tf
 import tensorflow_hub as hub
+os.environ['TFHUB_CACHE_DIR'] = '.tf_models'
 import tensorflow_addons as tfa
 from tensorflow.keras import layers, optimizers, losses, callbacks 
 import tensorflow_addons as tfa

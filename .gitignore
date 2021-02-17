@@ -6,3 +6,5 @@ __pycache__
 .Rproj.user
 *.R
 *.Rproj
+*.Rhistory
+.tf_models/
