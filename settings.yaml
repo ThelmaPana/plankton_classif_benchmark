@@ -3,11 +3,11 @@
 # Global settings
 global:
     # Reproducibility
-    random_state: null # null for no reproducibility, any integer for reproducibility.
+    random_state: 12 # null for no reproducibility, any integer for reproducibility.
     
     # Input data
     input_data:
-      instrument: 'flowcam' # name of the instrument. 
+      instrument: 'isiis' # name of the instrument. 
       split: [70, 15, 15] # split for training / validation / test. Sum should equal 100.
       n_max: null # maximum number of objects in each class for training data
 
@@ -33,22 +33,22 @@ cnn:
     px_del: 31 # number of pixels to delete at bottom of images (e.g. to remove a scale bar)
     preserve_size: false # whether to perserve size of organisms when images are resized for cnn input.
     # If true, small images will be padded to desired size; if false, small images will be resized to desired size. 
-    augment: false # wheter to use data augmentation for training
+    augment: true # wheter to use data augmentation for training
     use_weights: true # whether to use class weights for training
     weights: 'sqrt_i_f' # method for weights computation. 'i_f' for inverse frequency, 'sqrt_i_f' for square root of inverse frequency
   
   architecture:
-    fc_layers_nb: null # number of fully connected layers to insert between the feature extractor and the classification clayer
-    fc_layers_size: null # size of fully connected layers
-    fc_layers_dropout: null # drop-out rate for fully connected layers
+    fc_layers_nb: 1 # number of fully connected layers to insert between the feature extractor and the classification clayer
+    fc_layers_size: 680 # size of fully connected layers
+    fc_layers_dropout: 0.5 # drop-out rate for fully connected layers
     classif_layer_dropout: null # drop-out rate for fully classification layer
     train_fe: true # whether to train the feature extractor. If false, only fully connected layers and classification clayer will be trained. 
     
   compilation:
-    lr_method: 'constant' # learning rate evolution. 'decay' for a decaying learning rate; 'constant' for a constant learning rate
+    lr_method: 'decay' # learning rate evolution. 'decay' for a decaying learning rate; 'constant' for a constant learning rate
     initial_lr: 0.001 # initial learning rate
     decay_rate: 0.97 # rate for learning rate decay
     loss: 'cce' # computation of loss. 'cce' for categorical cross entropy; 'sfce' for sigmoid focal cross entropy.
 
   training:
-    epochs: 30 # number of epochs to train for
+    epochs: 50 # number of epochs to train for
