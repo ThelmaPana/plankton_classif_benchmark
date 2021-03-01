@@ -143,7 +143,7 @@ rf = models.train_rf(
 
 
 ## Evaluate the RF on test data
-test_accuracy = models.predict_evaluate_rf(
+models.predict_evaluate_rf(
     rf_model=rf, 
     df=df_test,
     df_classes=df_classes,

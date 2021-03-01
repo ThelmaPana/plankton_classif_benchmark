@@ -18,21 +18,21 @@ import tensorflow_addons as tfa
 
 def gridsearch_rf(df1, df2, max_features_try, min_samples_leaf_try, n_estimators_try, output_dir, n_jobs, class_weights=None, random_state=None):
     """
-    Do a grid search to find best hyperparameters for random forest model, including number of estimators.
+    Perform a grid search to find best hyperparameters for random forest model.
     
     Args:
         df1 (DataFrame): training data to use to fit grid search
         df2 (DataFrame): validation data to use to evaluate grid search        
-        max_features (list): number of variables per node; default sqrt(nb of vars)
-        min_samples_leaf (list): min number of objects in leaf; default for classif = 5
-        n_estimators (list): number of estimators (usually between 100 and 500)
+        max_features_try (list): tries for number of variables per node; default sqrt(nb of vars)
+        min_samples_leaf_try (list): tries for min number of objects in leaf; default for classif = 5
+        n_estimators_try (list): tries for number of estimators (usually between 100 and 500)
         output_dir (str): directory where to save gridsearch results
         n_jobs (int): number of cores to use 
-        class_weights(dict): weights for classes
+        class_weights (dict): weights for classes
         random_state (int or RandomState): controls both the randomness of the bootstrapping and features sampling; default=None
     
     Returns:
-        cv_res (DataFrame): results of grid search
+        results (DataFrame): results of grid search
         best_params (dict): best parameters based on validation accuracy value
     """
     
@@ -128,7 +128,6 @@ def train_rf(df, n_estimators, max_features, min_samples_leaf, n_jobs, class_wei
     
     Returns:
         rf (RandomForestClassifier): fitted random forest model
-        
     """
     
     # Shuffle data
@@ -167,7 +166,7 @@ def predict_evaluate_rf(rf_model, df, df_classes, output_dir):
         output_dir (str): directory where to save prediction results
     
     Returns:
-        accuracy (float): accuracy value
+        nothing
     """
     
     # Shuffle data
@@ -213,7 +212,7 @@ def predict_evaluate_rf(rf_model, df, df_classes, output_dir):
                     },
                     test_file)
         
-    return(accuracy)
+    pass
     
 
 def create_cnn(fc_layers_nb, fc_layers_dropout, fc_layers_size, classif_layer_dropout, classif_layer_size,  train_fe = False, glimpse = True):
@@ -223,10 +222,10 @@ def create_cnn(fc_layers_nb, fc_layers_dropout, fc_layers_size, classif_layer_dr
     
     Args:
         fc_layers_nb (int): number of fully connected layers 
+        fc_layers_dropout (float): dropout of fully connected layers
         fc_layers_size (int): size of fully connected layers 
-        fc_layers_dropout (float): dropout of fully connected layers 
-        classif_layer_size (int): size of classification layer (i.e. number of classes to predict)
         classif_layer_dropout (float): dropout of classification layer
+        classif_layer_size (int): size of classification layer (i.e. number of classes to predict)
         train_fe (bool): whether to train the feature extractor (True) or only classification head (False)
         glimpse(bool): whether to show a model summary
     
@@ -252,7 +251,7 @@ def create_cnn(fc_layers_nb, fc_layers_dropout, fc_layers_size, classif_layer_dr
                 model.add(layers.Dropout(fc_layers_dropout))
             model.add(layers.Dense(fc_layers_size, activation='relu'))
     
-    ### Classification layer
+    ## Classification layer
     if classif_layer_dropout:
         model.add(layers.Dropout(classif_layer_dropout))
     model.add(layers.Dense(classif_layer_size))
@@ -263,7 +262,7 @@ def create_cnn(fc_layers_nb, fc_layers_dropout, fc_layers_size, classif_layer_dr
     return model
 
 
-def compile_cnn(model, initial_lr, steps_per_epoch, lr_method='constant', decay_rate=None, loss='cce'):
+def compile_cnn(model, lr_method='constant', initial_lr, steps_per_epoch, decay_rate=None, loss='cce'):
     """
     Compiles a CNN model. 
     
@@ -274,11 +273,9 @@ def compile_cnn(model, initial_lr, steps_per_epoch, lr_method='constant', decay_
         steps_per_epochs (int): number of training steps at each epoch. Usually number_of_samples // batch_size or len(train_batches)
         decay_rate (float): rate for learning rate decay
         loss (str): method to compute loss. 'cce' for CategoricalCrossentropy (see https://www.tensorflow.org/api_docs/python/tf/keras/losses/CategoricalCrossentropy), 'sfce' for SigmoidFocalCrossEntropy (see https://www.tensorflow.org/addons/api_docs/python/tfa/losses/SigmoidFocalCrossEntropy), usefull for unbalanced classes
-
     
     Returns:
         model (tensorflow.python.keras.engine.sequential.Sequential): compiled CNN model
-        
     """
     # TODO if lr_method='decay', decay_rate in mandatory
 
@@ -323,7 +320,6 @@ def train_cnn(model, train_batches, valid_batches, batch_size, epochs, class_wei
         class_weight(dict): weights for classes
         output_dir (str): directory where to save model weights
         workers (int): number of parallel threads for data generators
-
     
     Returns:
         nothing
@@ -418,4 +414,4 @@ def predict_evaluate_cnn(model, batches, true_classes, df_classes, output_dir, w
                      'living_recall': living_recall,
                     },
                     test_file)
-
+    pass

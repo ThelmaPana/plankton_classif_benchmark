@@ -214,25 +214,28 @@ class DataGenerator(utils.Sequence):
         return batch_prepared_images, batch_encoded_labels
         
         
-def batch_glimpse(batches, classes):
+def batch_glimpse(batches, classes, n=1):
     """
     Randomly select an image from a batch and display it with its label
     
     Args:
-        batches (str): 
+        batches (DataGenerator): data generator to glimpse at
         classes (array): array of taxonomic classes
+        n(int): numer of images to look at
     
     Returns:
         nothing
         
     """
-
-    b = random.randint(0, len(batches)-1)
-    image_batch, label_batch = batches[b]
-    i = random.randint(0, len(label_batch)-1)
-    plt.imshow(image_batch[i][:,:,0], cmap='gray')
-    plt.title(classes[np.argmax(label_batch[i])])
-    plt.show()
+    
+    for _ in range(n):
+        b = random.randint(0, len(batches)-1)
+        image_batch, label_batch = batches[b]
+        i = random.randint(0, len(label_batch)-1)
+        plt.imshow(image_batch[i][:,:,0], cmap='gray')
+        plt.title(classes[np.argmax(label_batch[i])])
+        plt.show()
+        
     pass
 
 

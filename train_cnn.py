@@ -174,9 +174,9 @@ my_cnn = models.create_cnn(
 ## Compile CNN
 my_cnn = models.compile_cnn(
     my_cnn, 
+    lr_method=lr_method, 
     initial_lr, 
     steps_per_epoch=len(train_batches), 
-    lr_method=lr_method, 
     decay_rate=decay_rate, 
     loss=loss
 )
