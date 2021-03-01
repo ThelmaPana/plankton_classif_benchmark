@@ -70,17 +70,41 @@ def read_data_cnn(path, split=[70, 15, 15], n_max=None, random_state=None):
 
 ## Define a data generator 
 class DataGenerator(utils.Sequence):
-    'Generates data for Keras'
-    def __init__(self, df, data_dir, batch_size=32, image_dimensions = (224, 224, 3), shuffle=True, augment=False, px_del = 0, preserve_size=False):
-        self.df               = df                  # dataframe with path to images and classif_id
-        self.data_dir         = data_dir            # directory containing data
-        self.dim              = image_dimensions    # image dimensions
-        self.batch_size       = batch_size          # batch size
-        self.image_dimensions = image_dimensions    # image_dimensions
-        self.shuffle          = shuffle             # shuffle bool
-        self.augment          = augment             # augment bool
-        self.px_del           = px_del              # pixels to delete at bottom of images (scale bar)  
-        self.preserve_size    = preserve_size       # preserve_size bool         
+    """
+    Generate batches of data for CNN.
+    
+    Args:
+        df (DataFrame): dataframe with path to images and classif_id
+        classes (list, array): name of classes
+        data_dir (str): directory containing data
+        batch_size (int): number of images per batch
+        image_dimensions (tuple): images dimensions for CNN input
+        shuffle (bool): whether to shuffle data
+        augment (bool): whether to augment (zoom in/out, flip, shear) data
+        px_del (int): number of pixels to delete at bottom of images (e.g. to remove a scale bar)
+        preserve_size (bool): whether to preserve size of small images.
+            If False, all image are rescaled. If True, large images are rescaled and small images are padded to CNN input dimension.
+    
+    Returns:
+        A batch of `batch_size` images (4D ndarray) and one-hot encoded labels (2D ndarray)
+    """
+    
+    def __init__(self, df, classes, data_dir, batch_size=32, image_dimensions = (224, 224, 3), shuffle=True, augment=False, px_del = 0, preserve_size=False):
+        self.df               = df  
+        self.classes          = classes
+        self.data_dir         = data_dir            
+        self.dim              = image_dimensions    
+        self.batch_size       = batch_size          
+        self.image_dimensions = image_dimensions    
+        self.shuffle          = shuffle             
+        self.augment          = augment             
+        self.px_del           = px_del               
+        self.preserve_size    = preserve_size       
+        
+        # initialise the one-hot encoder
+        mlb = MultiLabelBinarizer(classes=classes)
+        self.class_encoder = mlb
+        
         self.on_epoch_end()
 
     def __len__(self):
@@ -90,17 +114,10 @@ class DataGenerator(utils.Sequence):
     def on_epoch_end(self):
         'Updates indexes after each epoch'
         self.indexes = np.arange(len(self.df))
+        # shuffle data if chosen
         if self.shuffle:
-            #np.random.shuffle(self.indexes)
             self.df = self.df.sample(frac=1).reset_index(drop=True)
-            
-    def class_encoder(self):
-        'Encodes classes with multi label binarizer'
-        mlb = MultiLabelBinarizer()
-        classif_id = self.df['classif_id'].tolist()
-        classif_id_enc = mlb.fit_transform([[c] for c in classif_id])
-        return classif_id_enc
-    
+             
     def get_padding_value(self, img):
         'Compute value to use to pad an image, as the median value of border pixels'
         # get height and width of image
@@ -145,14 +162,13 @@ class DataGenerator(utils.Sequence):
         paths = [os.path.join(self.data_dir, self.df.path_to_img[k]) for k in indexes]
         images = [lycon.load(p)/255 for p in paths]
         
-        square_images = []
+        batch_prepared_images = []
         output_size = self.image_dimensions[0]
         # resize images to proper dimension
         for img in images:
-            h = img.shape[0]
-            w = img.shape[1] 
+            h,w = img.shape[0:2]
             
-            # delete scale bar of 31px at bottom of image
+            # delete scale bar of px_del px at bottom of image
             img = img[0:h-self.px_del,:]
             h = img.shape[0]
             
@@ -181,24 +197,23 @@ class DataGenerator(utils.Sequence):
             
             # replace pixels in output by input image
             img_square[offset_ver:offset_ver+img.shape[0], offset_hor:offset_hor+img.shape[1]] = img
-            square_images.append(img_square)
+            batch_prepared_images.append(img_square)
         
         # convert to array of images        
-        square_images = np.array([img for img in square_images], dtype='float32')
+        batch_prepared_images = np.array([img for img in batch_prepared_images], dtype='float32')
         
         # data augmentation
         if self.augment == True:
-            square_images = self.augmenter(square_images)
+            batch_prepared_images = self.augmenter(batch_prepared_images)
             
         ## Labels
-        classif_id_enc = self.class_encoder()
-        labels = [classif_id_enc[k].tolist() for k in indexes]
-        labels = np.array(labels, dtype='float32')
+        batch_labels = [self.df.classif_id[i] for i in indexes]
+        batch_encoded_labels = self.class_encoder.fit_transform([[l] for l in batch_labels])
         
         # Return reshaped images with labels
-        return square_images, labels
-    
-
+        return batch_prepared_images, batch_encoded_labels
+        
+        
 def batch_glimpse(batches, classes):
     """
     Randomly select an image from a batch and display it with its label

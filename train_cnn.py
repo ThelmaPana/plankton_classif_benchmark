@@ -128,27 +128,31 @@ if use_weights:
 ## Generate batches
 train_batches = datasets.DataGenerator(
     df=df_train,
+    classes=df_classes.classif_id.tolist(),
     data_dir=data_dir,
     batch_size=batch_size, 
     augment=augment,
-    px_del=px_del)    
+    px_del=px_del
+)  
 
 valid_batches = datasets.DataGenerator(
     df=df_valid,
+    classes=df_classes.classif_id.tolist(),
     data_dir=data_dir,
     batch_size=batch_size, 
-    augment=False,
-    px_del=px_del,
-    shuffle=False
+    augment=False, # do not augment or shuffle validation data
+    shuffle=False,
+    px_del=px_del
 )
 
 test_batches = datasets.DataGenerator(
     df=df_test,
+    classes=df_classes.classif_id.tolist(),
     data_dir=data_dir,
     batch_size=batch_size, 
-    augment=False,
-    px_del=px_del,
-    shuffle=False
+    augment=False, # do not augment or shuffle validation data
+    shuffle=False,
+    px_del=px_del
 )
 
 for image_batch, label_batch in train_batches:
@@ -164,7 +168,8 @@ my_cnn = models.create_cnn(
     classif_layer_dropout, 
     classif_layer_size=nb_classes, 
     train_fe=train_fe, 
-    glimpse=True)
+    glimpse=True
+)
 
 ## Compile CNN
 my_cnn = models.compile_cnn(
