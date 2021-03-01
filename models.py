@@ -361,13 +361,14 @@ def train_cnn(model, train_batches, valid_batches, batch_size, epochs, class_wei
     return history
 
 
-def predict_evaluate_cnn(model, batches, df_classes, output_dir):
+def predict_evaluate_cnn(model, batches, df_test, df_classes, output_dir):
     """
     Predict batches and evaluate a CNN model by computing accuracy and loss and writting predictions and accuracy into a test file. 
     
     Args:
         model (tensorflow.python.keras.engine.sequential.Sequential): CNN model to evaiiluate
         batches (datasets.DataGenerator): batches of data to predict
+        df_test (DataFrame): dataframe of test images with true classes
         df_classes (DataFrame): dataframe of classes with living attribute
         output_dir (str): directory where to save prediction results
 
@@ -391,35 +392,12 @@ def predict_evaluate_cnn(model, batches, df_classes, output_dir):
     saved_weights.sort()
     model.load_weights(saved_weights[-1])
     
-    # Initiate empty lists for predicted and true labels
-    predicted_labels = []
-    true_labels = []
+    # Predict test batches and convert predictions to plankton classes
+    logits = model.predict(batches)
+    predicted_classes = classes[np.argmax(logits, axis=1)]
     
-    # Loop over test batches
-#    for image_batch, label_batch in batches:
-#        # Predict images of batch
-#        predicted_batches.extend(model.predict(image_batch))
-#        # Extract true labels of batch
-#        true_batches.extend(label_batch)
-    
-    # Loop over test batches
-    for i in range(len(batches)+1):
-        # Define image batch and label batch
-        image_batch = batches[i][0]
-        label_batch = batches[i][1]
-        
-        # if batch is not empty, predict it
-        if len(image_batch) > 0:
-            # Predict images of batch
-            predicted_batch = model.predict(image_batch)
-            # And add predictions to list of predicted batches
-            predicted_labels.extend(np.argmax(predicted_batch, axis=1))
-            # Extract true labels of batch and add to list of true batches
-            true_labels.extend(np.argmax(label_batch, axis=1))
-    
-    # Convert to class names
-    predicted_classes = classes[predicted_labels]
-    true_classes = classes[true_labels]
+    # Read true classes
+    true_classes = np.array(df_test.classif_id.tolist())
     
     # Compute accuracy, precision and recall for living classes and loss from true labels and predicted labels
     accuracy = accuracy_score(true_classes, predicted_classes)

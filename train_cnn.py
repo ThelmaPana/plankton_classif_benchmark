@@ -135,13 +135,19 @@ valid_batches = datasets.DataGenerator(
     df=df_valid,
     data_dir=data_dir,
     batch_size=batch_size, 
-    px_del=px_del)
+    augment=False,
+    px_del=px_del,
+    shuffle=False
+)
 
 test_batches = datasets.DataGenerator(
     df=df_test,
     data_dir=data_dir,
     batch_size=batch_size, 
-    px_del=px_del)
+    augment=False,
+    px_del=px_del,
+    shuffle=False
+)
 
 for image_batch, label_batch in train_batches:
     print("Image batch shape: ", image_batch.shape)
@@ -183,6 +189,7 @@ history = models.train_cnn(
 models.predict_evaluate_cnn(
     model=my_cnn, 
     batches=test_batches, 
+    df_test=df_test,
     df_classes=df_classes, 
     output_dir=output_dir
 )
