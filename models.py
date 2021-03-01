@@ -339,18 +339,12 @@ def train_cnn(model, train_batches, valid_batches, batch_size, epochs, class_wei
         save_weights_only=True,
         save_freq='epoch',
         verbose=1)
-
-    # Compute number of steps per epochs     
-    steps_per_epoch = len(train_batches)//batch_size
-    validation_steps = len(valid_batches)//batch_size
     
     # Fit the model.
     history = model.fit(
         train_batches, 
         epochs=epochs,
-        steps_per_epoch=steps_per_epoch,
         validation_data=valid_batches,
-        validation_steps=validation_steps,
         callbacks=[cp_callback],
         class_weight=class_weights,
         max_queue_size=max(10, workers*2),
