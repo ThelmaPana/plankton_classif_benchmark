@@ -262,7 +262,7 @@ def create_cnn(fc_layers_nb, fc_layers_dropout, fc_layers_size, classif_layer_dr
     return model
 
 
-def compile_cnn(model, lr_method='constant', initial_lr, steps_per_epoch, decay_rate=None, loss='cce'):
+def compile_cnn(model, lr_method, initial_lr, steps_per_epoch, decay_rate=None, loss='cce'):
     """
     Compiles a CNN model. 
     
