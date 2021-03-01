@@ -271,7 +271,7 @@ def compile_cnn(model, initial_lr, steps_per_epoch, lr_method='constant', decay_
         model (tensorflow.python.keras.engine.sequential.Sequential): CNN model to compile
         lr_method (str): method for learning rate. 'constant' for a constant learning rate, 'decay' for a decay
         initial_lr (float): initial learning rate. If lr_method is 'constant', set learning rate to this value
-        steps_per_epochs (int): number of training steps at each epoch. Usually number_of_epochs // batch_size
+        steps_per_epochs (int): number of training steps at each epoch. Usually number_of_samples // batch_size or len(train_batches)
         decay_rate (float): rate for learning rate decay
         loss (str): method to compute loss. 'cce' for CategoricalCrossentropy (see https://www.tensorflow.org/api_docs/python/tf/keras/losses/CategoricalCrossentropy), 'sfce' for SigmoidFocalCrossEntropy (see https://www.tensorflow.org/addons/api_docs/python/tfa/losses/SigmoidFocalCrossEntropy), usefull for unbalanced classes
 
@@ -316,9 +316,9 @@ def train_cnn(model, train_batches, valid_batches, batch_size, epochs, class_wei
     
     Args:
         model (tensorflow.python.keras.engine.sequential.Sequential): CNN model to train
-        train_batches
-        train_batches
-        batch_size (int): size if batches
+        train_batches: batches of training data
+        valid_batches: batches of validation data
+        batch_size (int): size of batches
         epochs (int): number of epochs to train for
         class_weight(dict): weights for classes
         output_dir (str): directory where to save model weights
@@ -366,8 +366,8 @@ def predict_evaluate_cnn(model, batches, df_test, df_classes, output_dir):
     Predict batches and evaluate a CNN model by computing accuracy and loss and writting predictions and accuracy into a test file. 
     
     Args:
-        model (tensorflow.python.keras.engine.sequential.Sequential): CNN model to evaiiluate
-        batches (datasets.DataGenerator): batches of data to predict
+        model (tensorflow.python.keras.engine.sequential.Sequential): CNN model to evaluate
+        batches (datasets.DataGenerator): batches of test data to predict
         df_test (DataFrame): dataframe of test images with true classes
         df_classes (DataFrame): dataframe of classes with living attribute
         output_dir (str): directory where to save prediction results
