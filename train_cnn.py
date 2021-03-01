@@ -197,7 +197,7 @@ history = models.train_cnn(
 models.predict_evaluate_cnn(
     model=my_cnn, 
     batches=test_batches, 
-    df_test=df_test,
+    true_classes = np.array(df_test.classif_id.tolist()),
     df_classes=df_classes, 
     output_dir=output_dir,
     workers=workers,

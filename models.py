@@ -358,14 +358,14 @@ def train_cnn(model, train_batches, valid_batches, batch_size, epochs, class_wei
     return history
 
 
-def predict_evaluate_cnn(model, batches, df_test, df_classes, output_dir, workers):
+def predict_evaluate_cnn(model, batches, true_classes, df_classes, output_dir, workers):
     """
     Predict batches and evaluate a CNN model by computing accuracy and loss and writting predictions and accuracy into a test file. 
     
     Args:
         model (tensorflow.python.keras.engine.sequential.Sequential): CNN model to evaluate
         batches (datasets.DataGenerator): batches of test data to predict
-        df_test (DataFrame): dataframe of test images with true classes
+        true_classes (list): true classes of test images
         df_classes (DataFrame): dataframe of classes with living attribute
         output_dir (str): directory where to save prediction results
         workers(int): number of parallel threads for data generators
@@ -393,10 +393,7 @@ def predict_evaluate_cnn(model, batches, df_test, df_classes, output_dir, worker
     # Predict test batches and convert predictions to plankton classes
     logits = model.predict(batches, max_queue_size=max(10, workers*2), workers=workers)
     predicted_classes = classes[np.argmax(logits, axis=1)]
-    
-    # Read true classes
-    true_classes = np.array(df_test.classif_id.tolist())
-    
+
     # Compute accuracy, precision and recall for living classes and loss from true labels and predicted labels
     accuracy = accuracy_score(true_classes, predicted_classes)
     balanced_accuracy = balanced_accuracy_score(true_classes, predicted_classes)
