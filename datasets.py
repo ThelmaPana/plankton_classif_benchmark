@@ -4,7 +4,6 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler, MultiLabelBinarizer
 from tensorflow.keras import utils
-import cv2
 import lycon
 import random
 import matplotlib.pyplot as plt
@@ -144,7 +143,7 @@ class DataGenerator(utils.Sequence):
 
         # select data and load images
         paths = [os.path.join(self.data_dir, self.df.path_to_img[k]) for k in indexes]
-        images = [cv2.imread(p)/255 for p in paths]
+        images = [lycon.load(p)/255 for p in paths]
         
         square_images = []
         output_size = self.image_dimensions[0]
