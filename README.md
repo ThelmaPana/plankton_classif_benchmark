@@ -15,7 +15,7 @@ The comparison is to be done on data from multiple plankton imaging devices:
 - UVP (Underwater Vision Profiler)
 
 ### Input data
-Store your input data in `data/<instrument_name>`. Your data must contain an `images` folder with your images, as well as a csv file named `<instrument>_data.csv` with one row per object.
+Store your input data in `data/<instrument_name>`. Your data must contain an `images` folder with your images, as well as a csv file named `<instrument_name>_data.csv` with one row per object.
 This csv file should contain the following columns:
 - `path_to_img`: path to image
 - `classif_id`: object classification
@@ -40,7 +40,7 @@ A random forest takes a vector of features as input and predicts a class from th
 
 ## Settings
 Settings can be customized in the `settings.yaml` file. 
-Reproductible results can be obtained using the `random_state` argument.
+Reproductible results can be obtained using the `random_state` argument (`random_state = 12` for paper results)
 
 ## Training
 Training is done in two phases:
