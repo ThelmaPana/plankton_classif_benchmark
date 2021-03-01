@@ -162,7 +162,7 @@ my_cnn = models.create_cnn(
 my_cnn = models.compile_cnn(
     my_cnn, 
     initial_lr, 
-    steps_per_epoch=len(train_batches)//epochs, 
+    steps_per_epoch=len(train_batches), 
     lr_method=lr_method, 
     decay_rate=decay_rate, 
     loss=loss
