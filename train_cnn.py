@@ -132,7 +132,8 @@ train_batches = datasets.DataGenerator(
     data_dir=data_dir,
     batch_size=batch_size, 
     augment=augment,
-    px_del=px_del
+    px_del=px_del,
+    random_state=12
 )  
 
 valid_batches = datasets.DataGenerator(
@@ -142,7 +143,8 @@ valid_batches = datasets.DataGenerator(
     batch_size=batch_size, 
     augment=False, # do not augment or shuffle validation data
     shuffle=False,
-    px_del=px_del
+    px_del=px_del,
+    random_state=random_state
 )
 
 test_batches = datasets.DataGenerator(
@@ -152,7 +154,8 @@ test_batches = datasets.DataGenerator(
     batch_size=batch_size, 
     augment=False, # do not augment or shuffle validation data
     shuffle=False,
-    px_del=px_del
+    px_del=px_del,
+    random_state=random_state
 )
 
 for image_batch, label_batch in train_batches:

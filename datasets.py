@@ -7,6 +7,7 @@ from tensorflow.keras import utils
 import lycon
 import random
 import matplotlib.pyplot as plt
+import imgaug as ia
 from imgaug import augmenters as iaa
 
 
@@ -84,12 +85,13 @@ class DataGenerator(utils.Sequence):
         px_del (int): number of pixels to delete at bottom of images (e.g. to remove a scale bar)
         preserve_size (bool): whether to preserve size of small images.
             If False, all image are rescaled. If True, large images are rescaled and small images are padded to CNN input dimension.
+        random_state (int or RandomState): controls the randomness
     
     Returns:
         A batch of `batch_size` images (4D ndarray) and one-hot encoded labels (2D ndarray)
     """
     
-    def __init__(self, df, classes, data_dir, batch_size=32, image_dimensions = (224, 224, 3), shuffle=True, augment=False, px_del = 0, preserve_size=False):
+    def __init__(self, df, classes, data_dir, batch_size=32, image_dimensions = (224, 224, 3), shuffle=True, augment=False, px_del = 0, preserve_size=False, random_state=None):
         self.df               = df  
         self.classes          = classes
         self.data_dir         = data_dir            
@@ -99,7 +101,8 @@ class DataGenerator(utils.Sequence):
         self.shuffle          = shuffle             
         self.augment          = augment             
         self.px_del           = px_del               
-        self.preserve_size    = preserve_size       
+        self.preserve_size    = preserve_size   
+        self.random_state     = random_state
         
         # initialise the one-hot encoder
         mlb = MultiLabelBinarizer(classes=classes)
@@ -116,7 +119,7 @@ class DataGenerator(utils.Sequence):
         self.indexes = np.arange(len(self.df))
         # shuffle data if chosen
         if self.shuffle:
-            self.df = self.df.sample(frac=1).reset_index(drop=True)
+            self.df = self.df.sample(frac=1, random_state=self.random_state).reset_index(drop=True)
              
     def get_padding_value(self, img):
         'Compute value to use to pad an image, as the median value of border pixels'
@@ -139,6 +142,10 @@ class DataGenerator(utils.Sequence):
     
     def augmenter(self, images):
         'Define a data augmenter which doses horizontalf flip (50% chance), vertical flip (50% chance), zoom and shear'
+        
+        if self.random_state is not None:
+            ia.seed(self.random_state) # set seed for randomness
+        
         seq = iaa.Sequential(
             [
                 iaa.Fliplr(0.5),  # horizontally flip 50% of all images
