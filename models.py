@@ -310,7 +310,7 @@ def compile_cnn(model, initial_lr, steps_per_epoch, lr_method='constant', decay_
     return model
 
 
-def train_cnn(model, train_batches, valid_batches, batch_size, epochs, class_weights, output_dir):
+def train_cnn(model, train_batches, valid_batches, batch_size, epochs, class_weights, output_dir, workers):
     """
     Trains a CNN model. 
     
@@ -322,6 +322,7 @@ def train_cnn(model, train_batches, valid_batches, batch_size, epochs, class_wei
         epochs (int): number of epochs to train for
         class_weight(dict): weights for classes
         output_dir (str): directory where to save model weights
+        workers (int): number of parallel threads for data generators
 
     
     Returns:
@@ -351,7 +352,9 @@ def train_cnn(model, train_batches, valid_batches, batch_size, epochs, class_wei
         validation_data=valid_batches,
         validation_steps=validation_steps,
         callbacks=[cp_callback],
-        class_weight=class_weights
+        class_weight=class_weights,
+        max_queue_size=max(10, workers*2),
+        workers=workers
     )
     
     # Write training history 
@@ -361,7 +364,7 @@ def train_cnn(model, train_batches, valid_batches, batch_size, epochs, class_wei
     return history
 
 
-def predict_evaluate_cnn(model, batches, df_test, df_classes, output_dir):
+def predict_evaluate_cnn(model, batches, df_test, df_classes, output_dir, workers):
     """
     Predict batches and evaluate a CNN model by computing accuracy and loss and writting predictions and accuracy into a test file. 
     
@@ -371,6 +374,7 @@ def predict_evaluate_cnn(model, batches, df_test, df_classes, output_dir):
         df_test (DataFrame): dataframe of test images with true classes
         df_classes (DataFrame): dataframe of classes with living attribute
         output_dir (str): directory where to save prediction results
+        workers(int): number of parallel threads for data generators
 
     
     Returns:
@@ -393,7 +397,7 @@ def predict_evaluate_cnn(model, batches, df_test, df_classes, output_dir):
     model.load_weights(saved_weights[-1])
     
     # Predict test batches and convert predictions to plankton classes
-    logits = model.predict(batches)
+    logits = model.predict(batches, max_queue_size=max(10, workers*2), workers=workers)
     predicted_classes = classes[np.argmax(logits, axis=1)]
     
     # Read true classes

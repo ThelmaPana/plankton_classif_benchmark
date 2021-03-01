@@ -10,6 +10,7 @@ import shutil
 import datetime
 import numpy as np
 import math
+
 import read_settings
 import datasets
 import models
@@ -50,6 +51,7 @@ decay_rate = cnn_settings['compilation']['decay_rate']
 loss       = cnn_settings['compilation']['loss']
 
 epochs = cnn_settings['training']['epochs']
+workers = cnn_settings['training']['workers']
 
 
 ## Output
@@ -182,7 +184,8 @@ history = models.train_cnn(
     batch_size=batch_size, 
     epochs=epochs, 
     class_weights=class_weights, 
-    output_dir=output_dir
+    output_dir=output_dir,
+    workers=workers,
 )
 
 ## Predict test batches and evaluate CNN
@@ -191,5 +194,6 @@ models.predict_evaluate_cnn(
     batches=test_batches, 
     df_test=df_test,
     df_classes=df_classes, 
-    output_dir=output_dir
+    output_dir=output_dir,
+    workers=workers,
 )

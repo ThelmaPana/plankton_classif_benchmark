@@ -168,6 +168,9 @@ def check_cnn():
     assert (isinstance(settings['training']['epochs'], int)) and \
         (settings['training']['epochs'] > 0), \
         'cnn > training > epochs should be a positive integer'
+    assert (isinstance(settings['training']['workers'], int)) and \
+        (settings['training']['workers'] > 0), \
+        'cnn > training > workers should be a positive integer'
 
     return settings
     
