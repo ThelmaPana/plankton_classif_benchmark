@@ -133,7 +133,7 @@ train_batches = datasets.DataGenerator(
     batch_size=batch_size, 
     augment=augment,
     px_del=px_del,
-    random_state=12
+    random_state=random_state
 )  
 
 valid_batches = datasets.DataGenerator(
