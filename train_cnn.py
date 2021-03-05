@@ -17,6 +17,11 @@ import models
 import matplotlib.pyplot as plt
 import tensorflow as tf
 
+#gpus = tf.config.experimental.list_physical_devices('GPU')
+#tf.config.experimental.set_memory_growth(gpus[0], True)
+#tf.config.experimental.set_virtual_device_configuration(gpus[0],
+#    [tf.config.experimental.VirtualDeviceConfiguration(memory_limit=20480)])
+
 #################################### Settings ####################################
 ## Read settings
 global_settings = read_settings.check_global()
@@ -152,7 +157,7 @@ test_batches = datasets.DataGenerator(
     classes=df_classes.classif_id.tolist(),
     data_dir=data_dir,
     batch_size=batch_size, 
-    augment=False, # do not augment or shuffle validation data
+    augment=False, # do not augment or shuffle test data
     shuffle=False,
     px_del=px_del,
     random_state=random_state
