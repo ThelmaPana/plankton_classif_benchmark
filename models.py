@@ -169,9 +169,6 @@ def predict_evaluate_rf(rf_model, df, df_classes, output_dir):
         nothing
     """
     
-    # Shuffle data
-    df = df.sample(frac=1).reset_index(drop=True)
-    
     # Split data and labels
     y = df['classif_id']
     X = df.drop('classif_id', axis=1)
@@ -181,8 +178,14 @@ def predict_evaluate_rf(rf_model, df, df_classes, output_dir):
     classes.sort()
     classes = np.array(classes)
     
-    # Make a list of living classes
-    eco_rev_classes = df_classes[df_classes['living']]['classif_id'].tolist()
+    # and of regrouped classes
+    classes_g = df_classes['classif_id_2'].tolist()
+    classes_g = list(set(classes_g))
+    classes_g.sort()
+    classes_g = np.array(classes_g)
+    
+    # Make a list of ecologically relevant classes
+    eco_rev_classes = df_classes[df_classes['eco_rev']]['classif_id'].tolist()
     eco_rev_classes = np.array(eco_rev_classes)
     
     # Predict test data
@@ -194,24 +197,55 @@ def predict_evaluate_rf(rf_model, df, df_classes, output_dir):
     eco_rev_precision = precision_score(y, y_pred, labels=eco_rev_classes, average='weighted', zero_division=0)
     eco_rev_recall = recall_score(y, y_pred, labels=eco_rev_classes, average='weighted', zero_division=0)
     
+    # Display results
     print(f'Test accuracy = {accuracy}')
     print(f'Balanced test accuracy = {balanced_accuracy}')
-    print(f'Weighted ecologically relevant precision = {living_precision}')
-    print(f'Weighted ecologically relevant recall = {living_recall}')
+    print(f'Weighted ecologically relevant precision = {eco_rev_precision}')
+    print(f'Weighted ecologically relevant recall = {eco_rev_recall}')
+     
+    ## Now do the same after regrouping objects to larger classes
+    # Generate taxonomy match between taxo used for classif and larger ecological classes 
+    taxo_match = df_classes.set_index('classif_id').to_dict('index')
     
-    # Write true and predicted classes and accuracy to test file
+    # Convert true classes to larger ecological classes
+    y_g = [taxo_match[t]['classif_id_2'] for t in y]
+    
+    # Convert predicted classes to larger ecological classes
+    y_pred_g = [taxo_match[p]['classif_id_2'] for p in y_pred]
+    
+    # Compute accuracy, precision and recall for living classes and loss from true labels and predicted labels
+    accuracy_g = accuracy_score(y_g, y_pred_g)
+    balanced_accuracy_g = balanced_accuracy_score(y_g, y_pred_g)
+    eco_rev_precision_g = precision_score(y_g, y_pred_g, labels=eco_rev_classes, average='weighted', zero_division=0)
+    eco_rev_recall_g = recall_score(y_g, y_pred_g, labels=eco_rev_classes, average='weighted', zero_division=0)
+    
+    # Display results
+    print(f'Grouped test accuracy = {accuracy_g}')
+    print(f'Grouped balanced test accuracy = {balanced_accuracy_g}')
+    print(f'Grouped weighted ecologically relevant precision = {eco_rev_precision_g}')
+    print(f'Grouped weighted ecologically relevant recall = {eco_rev_recall_g}')
+
+    # Write classes and test metrics into a test file
     with open(os.path.join(output_dir, 'test_results.pickle'),'wb') as test_file:
-        pickle.dump({'true_classes': y,
-                     'predicted_classes': y_pred,
-                     'classes': classes,
-                     'eco_rev_classes': eco_rev_classes,
-                     'accuracy': accuracy,
-                     'balanced_accuracy': balanced_accuracy,
-                     'eco_rev_precision': eco_rev_precision,
-                     'eco_rev_recall': eco_rev_recall,
-                    },
-                    test_file)
-        
+        pickle.dump({
+            'classes': classes,
+            'classes_g': classes_g,
+            'eco_rev_classes': eco_rev_classes,
+            'true_classes': y,
+            'predicted_classes': y_pred,
+            'true_classes_g': y_g,
+            'predicted_classes_g': y_pred_g,
+            'accuracy': accuracy,
+            'balanced_accuracy': balanced_accuracy,
+            'eco_rev_precision': eco_rev_precision,
+            'eco_rev_recall': eco_rev_recall,
+            'accuracy_g': accuracy_g,
+            'balanced_accuracy_g': balanced_accuracy_g,
+            'eco_rev_precision_g': eco_rev_precision_g,
+            'eco_rev_recall_g': eco_rev_recall_g,
+        },
+        test_file)
+
     pass
     
 
@@ -432,7 +466,7 @@ def predict_evaluate_cnn(model, batches, true_classes, df_classes, output_dir, w
     print(f'Grouped weighted ecologically relevant precision = {eco_rev_precision_g}')
     print(f'Grouped weighted ecologically relevant recall = {eco_rev_recall_g}')
     
-    # Write true and predicted classes to test file
+    # Write classes and test metrics into a test file
     with open(os.path.join(output_dir, 'test_results.pickle'),'wb') as test_file:
         pickle.dump({
             'classes': classes,

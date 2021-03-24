@@ -17,15 +17,15 @@ def read_data_cnn(path, frac=1, random_state=None):
     
     Args:
         path (str): path to the file
-        split (list): proportions for train, validation and test splits. Sum is 100.
-        n_max (NoneType or int): maximum number of objects per class for training set
-        random_state (int or RandomState): controls both the randomness of the bootstrapping and features sampling; default=None
+        frac (float, int): fraction of dataset to use
+        random_state (int or RandomState): controls the randomness of shuffling and augmentation; default=None
     
     Returns:
         df_train (DataFrame): training data containing path to image and classif_id
         df_val (DataFrame): validation data containing path to image and classif_id
         df_test (DataFrame): testing data containing path to image and classif_id
-        df_classes (DataFrame): classes with their living attribute
+        df_classes (DataFrame): classes with their ecological relevance
+        df_comp (DataFrame): dataset composition
     """
     
     # Read CSV file
@@ -39,7 +39,7 @@ def read_data_cnn(path, frac=1, random_state=None):
     
     # Fraction subsample 
     if frac < 1:
-        df = df.groupby(['classif_id','set'], group_keys=False).apply(lambda x: x.sample(frac=frac, random_state=random_state))
+        df = df.groupby(['classif_id','set'], group_keys=False).apply(lambda x: x.sample(frac=frac, random_state=random_state)).reset_index(drop=True)
         
     
     # Extract training, validation and test splits
@@ -230,82 +230,54 @@ def batch_glimpse(batches, classes, n=1):
     pass
 
 
-def read_data_rf(path, split = [70, 15, 15], n_max=None, random_state=None):
+def read_data_rf(path, frac=1, random_state=None):
     """
     Read a csv file containing data to train the RandomForest and scale features between 0 and 1. 
     
     Args:
         path (str): path to the file
-        split (list): proportions for train, validation and test splits. Sum is 100.
-        n_max (NoneType or int): maximum number of objects per class for training set
+        frac (float, int): fraction of dataset to use
         random_state (int or RandomState): controls both the randomness of the bootstrapping and features sampling; default=None
     
     Returns:
         df_train (DataFrame): training data containing object features and classif_id
         df_val (DataFrame): validation data containing object features and classif_id
         df_test (DataFrame): testing data containing object features and classif_id
-        df_classes (DataFrame): classes with their living attribute
+        df_classes (DataFrame): classes with their ecological relevance
+        df_comp (DataFrame): dataset composition
     """
     
     # Read CSV file
-    df = pd.read_csv(path)
+    df = pd.read_csv(path).rename(columns = {'classif_id_1':'classif_id'})
     
-    # TODO check that mandatory columns are present: 'classif_id', 'living', 'path_to_img'
-    
-    # Extract living attribute
-    df_classes = df[['classif_id', 'living']].drop_duplicates().sort_values('classif_id').reset_index(drop=True)
+    # Extract classes ('classif_id_1' for model training and 'classif_id_2' for posterior ecological groupings) and ecological relevance
+    df_classes = df[['classif_id', 'classif_id_2', 'eco_rev']].drop_duplicates().sort_values('classif_id').reset_index(drop=True)
     
     # Delete columns 'path_to_img' 
-    df = df.drop(columns=['path_to_img', 'living'])
+    df = df.drop(columns=['path_to_img', 'classif_id_2', 'eco_rev'])
     
-    # Make a stratified sampling by classif_id
+    # Fraction subsample 
+    if frac < 1:
+        df = df.groupby(['classif_id','set'], group_keys=False).apply(lambda x: x.sample(frac=frac, random_state=random_state)).reset_index(drop=True)
+        
+    # Separate labels and set from features
     y = df.pop('classif_id')
+    sets = df.pop('set')
     X = df
-    # split data for training
-    train_split = split[0]/100
-    X_train, X_eval, y_train, y_eval = train_test_split(X, y, train_size=train_split, random_state=random_state, stratify=y)
-    # split remaining data between validation and testing
-    test_size = split[2]/(100-split[0])
-    X_val, X_test, y_val, y_test = train_test_split(X_eval, y_eval, test_size=test_size, random_state=random_state, stratify=y_eval)
-    
-    # Sort and reset indexes
-    X_train = X_train.sort_index().reset_index(drop=True)
-    y_train = y_train.sort_index().reset_index(drop=True)
-    X_val   = X_val.sort_index().reset_index(drop=True)
-    y_val   = y_val.sort_index().reset_index(drop=True)
-    X_test  = X_test.sort_index().reset_index(drop=True)
-    y_test  = y_test.sort_index().reset_index(drop=True)
-    
-    ## Standardize feature values between 0 and 1
+
+    # Standardize feature values between 0 and 1
     min_max_scaler = MinMaxScaler()
-    # Initiate scaler with training data and scale training data
-    X_train_scaled = min_max_scaler.fit_transform(X_train)
-    X_train_scaled = pd.DataFrame(X_train_scaled, columns=X_train.columns)
+    X_scaled = min_max_scaler.fit_transform(X)
+    df = pd.DataFrame(X_scaled, columns=X.columns)
+    df['classif_id'] = y
+    df['set'] = sets
     
-    # Scale validation data
-    X_val_scaled = min_max_scaler.transform(X_val)
-    X_val_scaled = pd.DataFrame(X_val_scaled, columns=X_val.columns)
-    
-    # Scale testing data
-    X_test_scaled = min_max_scaler.transform(X_test)
-    X_test_scaled = pd.DataFrame(X_test_scaled, columns=X_test.columns)
-    
-    # put back together X and y for training, validation and test dataframes
-    df_train = X_train_scaled.copy()
-    df_train['classif_id'] = y_train
-    df_train = df_train.sort_values('classif_id', axis=0).reset_index(drop=True)
-
-    df_val = X_val_scaled.copy()
-    df_val['classif_id'] = y_val
-    df_val = df_val.sort_values('classif_id', axis=0).reset_index(drop=True)
-    
-    df_test = X_test_scaled.copy()
-    df_test['classif_id'] = y_test
-    df_test = df_test.sort_values('classif_id', axis=0).reset_index(drop=True)
-    
-    # Limit number of objects per class for training set
-    if n_max:
-        df_train = df_train.groupby('classif_id').apply(lambda x: x.sample(min(n_max,len(x)), random_state=random_state)).reset_index(drop=True)
+    # Extract training, validation and test splits
+    df_train = df[df['set'] == 'train'].drop('set', axis = 1).reset_index(drop=True)
+    df_valid = df[df['set'] == 'valid'].drop('set', axis = 1).reset_index(drop=True)
+    df_test  = df[df['set'] == 'test'].drop('set', axis = 1).reset_index(drop=True)
+ 
+    # Compute dataset composition
+    df_comp = df.groupby(['classif_id','set']).size().unstack(fill_value=0)
      
-    return df_train, df_val, df_test, df_classes
-
+    return df_train, df_valid, df_test, df_classes, df_comp

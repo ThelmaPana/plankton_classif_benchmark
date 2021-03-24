@@ -21,8 +21,7 @@ rf_settings = read_settings.check_rf()
 # Input data
 instrument = global_settings['input_data']['instrument']
 data_dir = os.path.join('data', instrument)
-split = global_settings['input_data']['split']
-n_max = global_settings['input_data']['n_max']
+frac = global_settings['input_data']['frac']
 
 # Random state
 random_state = global_settings['random_state']
@@ -80,18 +79,13 @@ read_settings.write_rf_settings(global_settings, rf_settings, output_dir)
 ##################################################################################
 
 ## Read data for RF
-df_train, df_valid, df_test, df_classes = datasets.read_data_rf(
+df_train, df_valid, df_test, df_classes, df_comp = datasets.read_data_rf(
     path=os.path.join(data_dir, '_'.join([instrument, 'data.csv'])),
-    split=split,
-    n_max=n_max,
-    random_state=random_state)
+    frac=frac,
+    random_state=random_state
+)
 
-# Extract dataset composition (split by classif_id) and write it to output_dir
-df_comp = pd.concat([
-    pd.concat([df_train['classif_id'], pd.DataFrame({'split':['train'] * len(df_train)})], axis=1),
-    pd.concat([df_valid['classif_id'], pd.DataFrame({'split':['valid'] * len(df_valid)})], axis=1),
-    pd.concat([df_test['classif_id'], pd.DataFrame({'split':['test'] * len(df_test)})], axis=1)
-], axis=0, ignore_index=True).groupby(['classif_id','split']).size().unstack(fill_value=0)
+# Write dataset composition to output_dir
 df_comp.to_csv(os.path.join(output_dir, 'df_comp.csv'), index=True)
 
 # Generate class weights

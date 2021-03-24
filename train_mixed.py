@@ -17,11 +17,6 @@ import models
 import matplotlib.pyplot as plt
 import tensorflow as tf
 
-#gpus = tf.config.experimental.list_physical_devices('GPU')
-#tf.config.experimental.set_memory_growth(gpus[0], True)
-#tf.config.experimental.set_virtual_device_configuration(gpus[0],
-#    [tf.config.experimental.VirtualDeviceConfiguration(memory_limit=20480)])
-
 #################################### Settings ####################################
 ## Read settings
 global_settings = read_settings.check_global()
@@ -30,7 +25,8 @@ cnn_settings = read_settings.check_cnn()
 # Input data
 instrument = global_settings['input_data']['instrument']
 data_dir = os.path.join('data', instrument)
-frac = global_settings['input_data']['frac']
+split = global_settings['input_data']['split']
+n_max = global_settings['input_data']['n_max']
 
 # Random state
 random_state = global_settings['random_state']
@@ -97,110 +93,25 @@ read_settings.write_cnn_settings(global_settings, cnn_settings, output_dir)
 ##################################################################################
 
 ## Read data for CNN
-df_train, df_valid, df_test, df_classes, df_comp = datasets.read_data_cnn(
+df_train_cnn, df_valid_cnn, df_test_cnn, df_classes = datasets.read_data_cnn(
     path=os.path.join(data_dir, '_'.join([instrument, 'data.csv'])),
-    frac=frac,
-    random_state=random_state
-)
-
-# Write dataset composition to output_dir
-df_comp.to_csv(os.path.join(output_dir, 'df_comp.csv'), index=True)
-
-# Number of plankton classes to predict
-nb_classes = len(df_classes)
-
-# Generate class weights
-class_weights = None
-if use_weights:
-    class_counts = df_train.groupby('classif_id').size()
-    count_max = 0
-    class_weights = {}
-    for idx in class_counts.items():
-        count_max = (idx[1], count_max) [idx[1] < count_max]
-    for i,idx in enumerate(class_counts.items()):
-        if weights == 'i_f': # Weights computed with inverse frequency
-            class_weights.update({i : count_max / idx[1]})
-        elif weights == 'sqrt_i_f': # # Weights computed with square root of inverse frequency
-            class_weights.update({i : math.sqrt(count_max / idx[1])})
+    split=split,
+    n_max=n_max,
+    random_state=random_state)
 
 
-## Generate batches
-train_batches = datasets.DataGenerator(
-    df=df_train,
-    classes=df_classes.classif_id.tolist(),
-    data_dir=data_dir,
-    batch_size=batch_size, 
-    augment=augment,
-    px_del=px_del,
-    random_state=random_state
-)  
+## Read data for RF
+df_train_rf, df_valid_rf, df_test_rf, df_classes = datasets.read_data_rf(
+    path=os.path.join(data_dir, '_'.join([instrument, 'data.csv'])),
+    split=split,
+    n_max=n_max,
+    random_state=random_state)
 
-valid_batches = datasets.DataGenerator(
-    df=df_valid,
-    classes=df_classes.classif_id.tolist(),
-    data_dir=data_dir,
-    batch_size=batch_size, 
-    augment=False, # do not augment or shuffle validation data
-    shuffle=False,
-    px_del=px_del,
-    random_state=random_state
-)
+df_all_rf = pd.concat([
+    pd.concat([df_train_rf, pd.DataFrame({'split':['train'] * len(df_train_rf)})], axis=1),
+    pd.concat([df_valid_rf, pd.DataFrame({'split':['valid'] * len(df_valid_rf)})], axis=1),
+    pd.concat([df_test_rf, pd.DataFrame({'split':['test'] * len(df_test_rf)})], axis=1)
+], axis=0, ignore_index=True)
 
-test_batches = datasets.DataGenerator(
-    df=df_test,
-    classes=df_classes.classif_id.tolist(),
-    data_dir=data_dir,
-    batch_size=batch_size, 
-    augment=False, # do not augment or shuffle test data
-    shuffle=False,
-    px_del=px_del,
-    random_state=random_state
-)
-
-for image_batch, label_batch in train_batches:
-    print("Image batch shape: ", image_batch.shape)
-    print("Label batch shape: ", label_batch.shape)
-    break
-
-## Generate CNN
-my_cnn = models.create_cnn(
-    fc_layers_nb,
-    fc_layers_dropout, 
-    fc_layers_size, 
-    classif_layer_dropout, 
-    classif_layer_size=nb_classes, 
-    train_fe=train_fe, 
-    glimpse=True
-)
-
-## Compile CNN
-my_cnn = models.compile_cnn(
-    my_cnn, 
-    lr_method=lr_method, 
-    initial_lr=initial_lr, 
-    steps_per_epoch=len(train_batches), 
-    decay_rate=decay_rate, 
-    loss=loss
-)
-
-## Train CNN
-history = models.train_cnn(
-    model=my_cnn, 
-    train_batches=train_batches, 
-    valid_batches=valid_batches, 
-    batch_size=batch_size, 
-    epochs=epochs, 
-    class_weights=class_weights, 
-    output_dir=output_dir,
-    workers=workers,
-)
-
-## Predict test batches and evaluate CNN
-models.predict_evaluate_cnn(
-    model=my_cnn, 
-    batches=test_batches, 
-    true_classes = np.array(df_test.classif_id.tolist()),
-    df_classes=df_classes, 
-    output_dir=output_dir,
-    workers=workers,
-)
+df_all_rf = df_all_rf[['area', 'filled_area', 'equivalent_diameter', 'perimeter', 'split', 'classif_id']]
+df_all_rf.describe()
