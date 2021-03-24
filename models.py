@@ -379,7 +379,13 @@ def predict_evaluate_cnn(model, batches, true_classes, df_classes, output_dir, w
     classes.sort()
     classes = np.array(classes)
     
-    # Make a list of living classes
+    # and of regrouped classes
+    classes_g = df_classes['classif_id_2'].tolist()
+    classes_g = list(set(classes_g))
+    classes_g.sort()
+    classes_g = np.array(classes_g)
+    
+    # Make a list of ecologically relevant classes
     eco_rev_classes = df_classes[df_classes['eco_rev']]['classif_id'].tolist()
     eco_rev_classes = np.array(eco_rev_classes)
     
@@ -428,19 +434,23 @@ def predict_evaluate_cnn(model, batches, true_classes, df_classes, output_dir, w
     
     # Write true and predicted classes to test file
     with open(os.path.join(output_dir, 'test_results.pickle'),'wb') as test_file:
-        pickle.dump({'true_classes': true_classes,
-                     'predicted_classes': predicted_classes,
-                     'classes': classes,
-                     'eco_rev_classes': eco_rev_classes,
-                     'accuracy': accuracy,
-                     'balanced_accuracy': balanced_accuracy,
-                     'eco_rev_precision': eco_rev_precision,
-                     'eco_rev_recall': eco_rev_recall,
-                     'accuracy_g': accuracy_g,
-                     'balanced_accuracy_g': balanced_accuracy_g,
-                     'eco_rev_precision_g': eco_rev_precision_g,
-                     'eco_rev_recall_g': eco_rev_recall_g,
-                    },
-                    test_file)
+        pickle.dump({
+            'classes': classes,
+            'classes_g': classes_g,
+            'eco_rev_classes': eco_rev_classes,
+            'true_classes': true_classes,
+            'predicted_classes': predicted_classes,
+            'true_classes_g': true_classes_g,
+            'predicted_classes_g': predicted_classes_g,
+            'accuracy': accuracy,
+            'balanced_accuracy': balanced_accuracy,
+            'eco_rev_precision': eco_rev_precision,
+            'eco_rev_recall': eco_rev_recall,
+            'accuracy_g': accuracy_g,
+            'balanced_accuracy_g': balanced_accuracy_g,
+            'eco_rev_precision_g': eco_rev_precision_g,
+            'eco_rev_recall_g': eco_rev_recall_g,
+        },
+        test_file)
 
     pass
