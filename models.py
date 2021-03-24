@@ -265,7 +265,6 @@ def create_cnn(fc_layers_nb, fc_layers_dropout, fc_layers_size, classif_layer_dr
     
     Returns:
         model (tensorflow.python.keras.engine.sequential.Sequential): CNN model
-        
     """
     
     ## Initiate empty model
@@ -357,7 +356,6 @@ def train_cnn(model, train_batches, valid_batches, batch_size, epochs, class_wei
     
     Returns:
         nothing
-        
     """
     # Set callbacks
     filepath = os.path.join(output_dir, "weights.{epoch:02d}.hdf5")
@@ -402,10 +400,8 @@ def predict_evaluate_cnn(model, batches, true_classes, df_classes, output_dir, w
         output_dir (str): directory where to save prediction results
         workers(int): number of parallel threads for data generators
 
-    
     Returns:
         Nothing
-        
     """
 
     # Make a list of classes

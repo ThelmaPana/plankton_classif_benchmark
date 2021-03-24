@@ -25,15 +25,8 @@ def check_global():
         'global > instrument should be a string'
     assert os.path.isdir(os.path.join('data', settings['input_data']['instrument'])), \
         'no data directory found for this instrument'
-    
-    ## train/validation/test split
-    #assert (isinstance(settings['input_data']['split'], list)) and \
-    #    (sum([isinstance(x, (int, float)) for x in settings['input_data']['split']]) == 3), \
-    #    'global > input_data > split should be a list of 3 numbers'
-    #assert sum(settings['input_data']['split']) == 100, \
-    #    'global > input_data > split should sum to 100'
-    
-    # n_max
+        
+    # fraction
     assert isinstance(settings['input_data']['frac'], (int, float)) and \
         (settings['input_data']['frac'] > 0 and settings['input_data']['frac'] <= 1), \
         'global > input_data > frac should be none or a float in ]0,1]'
