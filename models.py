@@ -182,8 +182,8 @@ def predict_evaluate_rf(rf_model, df, df_classes, output_dir):
     classes = np.array(classes)
     
     # Make a list of living classes
-    living_classes = df_classes[df_classes['living']]['classif_id'].tolist()
-    living_classes = np.array(living_classes)
+    eco_rev_classes = df_classes[df_classes['living']]['classif_id'].tolist()
+    eco_rev_classes = np.array(eco_rev_classes)
     
     # Predict test data
     y_pred = rf_model.predict(X)
@@ -191,24 +191,24 @@ def predict_evaluate_rf(rf_model, df, df_classes, output_dir):
     # Compute accuracy between true labels and predicted labels
     accuracy = accuracy_score(y, y_pred)
     balanced_accuracy = balanced_accuracy_score(y, y_pred)
-    living_precision = precision_score(y, y_pred, labels=living_classes, average='weighted', zero_division=0)
-    living_recall = recall_score(y, y_pred, labels=living_classes, average='weighted', zero_division=0)
+    eco_rev_precision = precision_score(y, y_pred, labels=eco_rev_classes, average='weighted', zero_division=0)
+    eco_rev_recall = recall_score(y, y_pred, labels=eco_rev_classes, average='weighted', zero_division=0)
     
     print(f'Test accuracy = {accuracy}')
     print(f'Balanced test accuracy = {balanced_accuracy}')
-    print(f'Weighted living precision = {living_precision}')
-    print(f'Weighted living recall = {living_recall}')
+    print(f'Weighted ecologically relevant precision = {living_precision}')
+    print(f'Weighted ecologically relevant recall = {living_recall}')
     
     # Write true and predicted classes and accuracy to test file
     with open(os.path.join(output_dir, 'test_results.pickle'),'wb') as test_file:
         pickle.dump({'true_classes': y,
                      'predicted_classes': y_pred,
                      'classes': classes,
-                     'living_classes': living_classes,
+                     'eco_rev_classes': eco_rev_classes,
                      'accuracy': accuracy,
                      'balanced_accuracy': balanced_accuracy,
-                     'living_precision': living_precision,
-                     'living_recall': living_recall,
+                     'eco_rev_precision': eco_rev_precision,
+                     'eco_rev_recall': eco_rev_recall,
                     },
                     test_file)
         
@@ -356,7 +356,8 @@ def train_cnn(model, train_batches, valid_batches, batch_size, epochs, class_wei
 
 def predict_evaluate_cnn(model, batches, true_classes, df_classes, output_dir, workers):
     """
-    Predict batches and evaluate a CNN model by computing accuracy and loss and writting predictions and accuracy into a test file. 
+    Predict batches and evaluate a CNN model.
+    Predict images from test set and compute accuracy, balanced_accuracy, precision and recall on relevant classes.
     
     Args:
         model (tensorflow.python.keras.engine.sequential.Sequential): CNN model to evaluate
@@ -378,8 +379,8 @@ def predict_evaluate_cnn(model, batches, true_classes, df_classes, output_dir, w
     classes = np.array(classes)
     
     # Make a list of living classes
-    living_classes = df_classes[df_classes['living']]['classif_id'].tolist()
-    living_classes = np.array(living_classes)
+    eco_rev_classes = df_classes[df_classes['eco_rev']]['classif_id'].tolist()
+    eco_rev_classes = np.array(eco_rev_classes)
     
     # Load last saved weights to CNN model
     saved_weights = glob.glob(os.path.join(output_dir, "*.hdf5"))
@@ -393,25 +394,25 @@ def predict_evaluate_cnn(model, batches, true_classes, df_classes, output_dir, w
     # Compute accuracy, precision and recall for living classes and loss from true labels and predicted labels
     accuracy = accuracy_score(true_classes, predicted_classes)
     balanced_accuracy = balanced_accuracy_score(true_classes, predicted_classes)
-    living_precision = precision_score(true_classes, predicted_classes, labels=living_classes, average='weighted', zero_division=0)
-    living_recall = recall_score(true_classes, predicted_classes, labels=living_classes, average='weighted', zero_division=0)
+    eco_rev_precision = precision_score(true_classes, predicted_classes, labels=eco_rev_classes, average='weighted', zero_division=0)
+    eco_rev_recall = recall_score(true_classes, predicted_classes, labels=eco_rev_classes, average='weighted', zero_division=0)
     
     # Display results
     print(f'Test accuracy = {accuracy}')
     print(f'Balanced test accuracy = {balanced_accuracy}')
-    print(f'Weighted living precision = {living_precision}')
-    print(f'Weighted living recall = {living_recall}')
+    print(f'Weighted ecologically relevant precision = {eco_rev_precision}')
+    print(f'Weighted ecologically relevant recall = {eco_rev_recall}')
     
     # Write true and predicted classes to test file
     with open(os.path.join(output_dir, 'test_results.pickle'),'wb') as test_file:
         pickle.dump({'true_classes': true_classes,
                      'predicted_classes': predicted_classes,
                      'classes': classes,
-                     'living_classes': living_classes,
+                     'eco_rev_classes': eco_rev_classes,
                      'accuracy': accuracy,
                      'balanced_accuracy': balanced_accuracy,
-                     'living_precision': living_precision,
-                     'living_recall': living_recall,
+                     'eco_rev_precision': eco_rev_precision,
+                     'eco_rev_recall': eco_rev_recall,
                     },
                     test_file)
     pass

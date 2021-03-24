@@ -30,8 +30,8 @@ cnn_settings = read_settings.check_cnn()
 # Input data
 instrument = global_settings['input_data']['instrument']
 data_dir = os.path.join('data', instrument)
-split = global_settings['input_data']['split']
-n_max = global_settings['input_data']['n_max']
+#split = global_settings['input_data']['split']
+frac = global_settings['input_data']['frac']
 
 # Random state
 random_state = global_settings['random_state']
@@ -98,18 +98,13 @@ read_settings.write_cnn_settings(global_settings, cnn_settings, output_dir)
 ##################################################################################
 
 ## Read data for CNN
-df_train, df_valid, df_test, df_classes = datasets.read_data_cnn(
+df_train, df_valid, df_test, df_classes, df_comp = datasets.read_data_cnn(
     path=os.path.join(data_dir, '_'.join([instrument, 'data.csv'])),
-    split=split,
-    n_max=n_max,
-    random_state=random_state)
+    frac=frac,
+    random_state=random_state
+)
 
-# Extract dataset composition (split by classif_id) and write it to output_dir
-df_comp = pd.concat([
-    pd.concat([df_train['classif_id'], pd.DataFrame({'split':['train'] * len(df_train)})], axis=1),
-    pd.concat([df_valid['classif_id'], pd.DataFrame({'split':['valid'] * len(df_valid)})], axis=1),
-    pd.concat([df_test['classif_id'], pd.DataFrame({'split':['test'] * len(df_test)})], axis=1)
-], axis=0, ignore_index=True).groupby(['classif_id','split']).size().unstack(fill_value=0)
+# Write dataset composition to output_dir
 df_comp.to_csv(os.path.join(output_dir, 'df_comp.csv'), index=True)
 
 # Number of plankton classes to predict
@@ -210,3 +205,5 @@ models.predict_evaluate_cnn(
     output_dir=output_dir,
     workers=workers,
 )
+
+

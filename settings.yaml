@@ -7,9 +7,8 @@ global:
     
     # Input data
     input_data:
-      instrument: 'isiis' # name of the instrument. 
-      split: [70, 15, 15] # split for training / validation / test. Sum should equal 100.
-      n_max: null # maximum number of objects in each class for training data
+      instrument: 'zooscan' # name of the instrument. 
+      frac: 0.1 # fraction ]0,1] of dataset to be used (usefull to generate a smaller dataset for testing)
 
 # Random Forest
 rf:
@@ -29,7 +28,7 @@ rf:
 # Convolutional Neural Network
 cnn:
   data:
-    batch_size: 32 # size of batches
+    batch_size: 256 # size of batches
     px_del: 31 # number of pixels to delete at bottom of images (e.g. to remove a scale bar)
     preserve_size: false # whether to perserve size of organisms when images are resized for cnn input.
     # If true, small images will be padded to desired size; if false, small images will be resized to desired size. 

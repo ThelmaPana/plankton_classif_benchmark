@@ -1,7 +1,7 @@
 import os
 import pandas as pd
 import numpy as np
-from sklearn.model_selection import train_test_split
+#from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler, MultiLabelBinarizer
 from tensorflow.keras import utils
 import lycon
@@ -11,7 +11,7 @@ import imgaug as ia
 from imgaug import augmenters as iaa
 
 
-def read_data_cnn(path, split=[70, 15, 15], n_max=None, random_state=None):
+def read_data_cnn(path, frac=1, random_state=None):
     """
     Read a csv file containing data to train the cnn
     
@@ -29,44 +29,28 @@ def read_data_cnn(path, split=[70, 15, 15], n_max=None, random_state=None):
     """
     
     # Read CSV file
-    df = pd.read_csv(path)
+    df = pd.read_csv(path).rename(columns = {'classif_id_1':'classif_id'})
     
-    # TODO check that mandatory columns are present: 'classif_id', living, 'path_to_img'
+    # Extract classes ('classif_id_1' for model training and 'classif_id_2' for posterior ecological groupings) and ecological relevance
+    df_classes = df[['classif_id', 'classif_id_2', 'eco_rev']].drop_duplicates().sort_values('classif_id').reset_index(drop=True)
     
-    # Extract living attribute
-    df_classes = df[['classif_id', 'living']].drop_duplicates().sort_values('classif_id').reset_index(drop=True)
+    # The classifier is a CNN, keep 'classif_id_1', 'path_to_img' and 'set' split
+    df = df[['path_to_img', 'classif_id', 'set']]
     
-    # The classifier is a CNN, keep 'classif_id', and 'path_to_img'
-    df = df[['path_to_img', 'classif_id']]
+    # Fraction subsample 
+    if frac < 1:
+        df = df.groupby(['classif_id','set'], group_keys=False).apply(lambda x: x.sample(frac=frac, random_state=random_state))
+        
     
-    # Make a stratified sampling by classif_id: 70% of data for training, 15% for validation and 15% for test
-    y = df.pop('classif_id')
-    X = df
-    # split data for training
-    train_split = split[0]/100
-    X_train, X_eval, y_train, y_eval = train_test_split(X, y, train_size=train_split, random_state=random_state, stratify=y)
-    # split remaining data between validation and testing
-    test_size = split[2]/(100-split[0])
-    X_val, X_test, y_val, y_test = train_test_split(X_eval, y_eval, test_size=test_size, random_state=random_state, stratify=y_eval)
+    # Extract training, validation and test splits
+    df_train = df[df['set'] == 'train'].drop('set', axis = 1).reset_index(drop=True)
+    df_valid = df[df['set'] == 'valid'].drop('set', axis = 1).reset_index(drop=True)
+    df_test  = df[df['set'] == 'test'].drop('set', axis = 1).reset_index(drop=True)
     
-    # put back together X and y for training, validation and test dataframes
-    df_train = X_train.copy()
-    df_train['classif_id'] = y_train
-    df_train = df_train.sort_values('classif_id', axis=0).reset_index(drop=True)
+    # Compute dataset composition
+    df_comp = df.groupby(['classif_id','set']).size().unstack(fill_value=0)
 
-    df_val = X_val.copy()
-    df_val['classif_id'] = y_val
-    df_val = df_val.sort_values('classif_id', axis=0).reset_index(drop=True)
-    
-    df_test = X_test.copy()
-    df_test['classif_id'] = y_test
-    df_test = df_test.sort_values('classif_id', axis=0).reset_index(drop=True)
-    
-    # Limit number of objects per class for training set
-    if n_max:
-        df_train = df_train.groupby('classif_id').apply(lambda x: x.sample(min(n_max,len(x)), random_state=random_state)).reset_index(drop=True)
-  
-    return df_train, df_val, df_test, df_classes
+    return df_train, df_valid, df_test, df_classes, df_comp
 
 
 ## Define a data generator 
