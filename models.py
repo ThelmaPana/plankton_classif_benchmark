@@ -358,6 +358,7 @@ def predict_evaluate_cnn(model, batches, true_classes, df_classes, output_dir, w
     """
     Predict batches and evaluate a CNN model.
     Predict images from test set and compute accuracy, balanced_accuracy, precision and recall on relevant classes.
+    Regroup objects into larger ecological classes and re-evaluate model.
     
     Args:
         model (tensorflow.python.keras.engine.sequential.Sequential): CNN model to evaluate
@@ -403,6 +404,28 @@ def predict_evaluate_cnn(model, batches, true_classes, df_classes, output_dir, w
     print(f'Weighted ecologically relevant precision = {eco_rev_precision}')
     print(f'Weighted ecologically relevant recall = {eco_rev_recall}')
     
+    ## Now do the same after regrouping objects to larger classes
+    # Generate taxonomy match between taxo used for classif and larger ecological classes 
+    taxo_match = df_classes.set_index('classif_id').to_dict('index')
+    
+    # Convert true classes to larger ecological classes
+    true_classes_g = [taxo_match[t]['classif_id_2'] for t in true_classes]
+    
+    # Convert predicted classes to larger ecological classes
+    predicted_classes_g = [taxo_match[p]['classif_id_2'] for p in predicted_classes]
+    
+    # Compute accuracy, precision and recall for living classes and loss from true labels and predicted labels
+    accuracy_g = accuracy_score(true_classes_g, predicted_classes_g)
+    balanced_accuracy_g = balanced_accuracy_score(true_classes_g, predicted_classes_g)
+    eco_rev_precision_g = precision_score(true_classes_g, predicted_classes_g, labels=eco_rev_classes, average='weighted', zero_division=0)
+    eco_rev_recall_g = recall_score(true_classes_g, predicted_classes_g, labels=eco_rev_classes, average='weighted', zero_division=0)
+    
+    # Display results
+    print(f'Grouped test accuracy = {accuracy_g}')
+    print(f'Grouped balanced test accuracy = {balanced_accuracy_g}')
+    print(f'Grouped weighted ecologically relevant precision = {eco_rev_precision_g}')
+    print(f'Grouped weighted ecologically relevant recall = {eco_rev_recall_g}')
+    
     # Write true and predicted classes to test file
     with open(os.path.join(output_dir, 'test_results.pickle'),'wb') as test_file:
         pickle.dump({'true_classes': true_classes,
@@ -413,6 +436,11 @@ def predict_evaluate_cnn(model, batches, true_classes, df_classes, output_dir, w
                      'balanced_accuracy': balanced_accuracy,
                      'eco_rev_precision': eco_rev_precision,
                      'eco_rev_recall': eco_rev_recall,
+                     'accuracy_g': accuracy_g,
+                     'balanced_accuracy_g': balanced_accuracy_g,
+                     'eco_rev_precision_g': eco_rev_precision_g,
+                     'eco_rev_recall_g': eco_rev_recall_g,
                     },
                     test_file)
+
     pass
