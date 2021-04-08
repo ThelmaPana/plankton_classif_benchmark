@@ -170,9 +170,11 @@ def predict_evaluate_rf(rf_model, df, df_classes, output_dir):
     """
     
     # Split data and labels
-    y = df['classif_id']
+    y = df['classif_id'].tolist()
+    y.sort()
+    y = np.array(y)
     X = df.drop('classif_id', axis=1)
-    
+
     # Make a list of classes
     classes = df_classes['classif_id'].tolist()
     classes.sort()
@@ -187,6 +189,10 @@ def predict_evaluate_rf(rf_model, df, df_classes, output_dir):
     # Make a list of ecologically relevant classes
     eco_rev_classes = df_classes[df_classes['eco_rev']]['classif_id'].tolist()
     eco_rev_classes = np.array(eco_rev_classes)
+    
+    # Make a list of ecologically relevant classes for grouped classes
+    eco_rev_classes_g = df_classes[df_classes['eco_rev']]['classif_id_2'].tolist()
+    eco_rev_classes_g = np.array(eco_rev_classes_g)
     
     # Predict test data
     y_pred = rf_model.predict(X)
@@ -208,16 +214,16 @@ def predict_evaluate_rf(rf_model, df, df_classes, output_dir):
     taxo_match = df_classes.set_index('classif_id').to_dict('index')
     
     # Convert true classes to larger ecological classes
-    y_g = [taxo_match[t]['classif_id_2'] for t in y]
+    y_g = np.array([taxo_match[t]['classif_id_2'] for t in y])
     
     # Convert predicted classes to larger ecological classes
-    y_pred_g = [taxo_match[p]['classif_id_2'] for p in y_pred]
+    y_pred_g = np.array([taxo_match[p]['classif_id_2'] for p in y_pred])
     
     # Compute accuracy, precision and recall for living classes and loss from true labels and predicted labels
     accuracy_g = accuracy_score(y_g, y_pred_g)
     balanced_accuracy_g = balanced_accuracy_score(y_g, y_pred_g)
-    eco_rev_precision_g = precision_score(y_g, y_pred_g, labels=eco_rev_classes, average='weighted', zero_division=0)
-    eco_rev_recall_g = recall_score(y_g, y_pred_g, labels=eco_rev_classes, average='weighted', zero_division=0)
+    eco_rev_precision_g = precision_score(y_g, y_pred_g, labels=eco_rev_classes_g, average='weighted', zero_division=0)
+    eco_rev_recall_g = recall_score(y_g, y_pred_g, labels=eco_rev_classes_g, average='weighted', zero_division=0)
     
     # Display results
     print(f'Grouped test accuracy = {accuracy_g}')
@@ -419,6 +425,10 @@ def predict_evaluate_cnn(model, batches, true_classes, df_classes, output_dir, w
     eco_rev_classes = df_classes[df_classes['eco_rev']]['classif_id'].tolist()
     eco_rev_classes = np.array(eco_rev_classes)
     
+    # Make a list of ecologically relevant classes for grouped classes
+    eco_rev_classes_g = df_classes[df_classes['eco_rev']]['classif_id_2'].tolist()
+    eco_rev_classes_g = np.array(eco_rev_classes_g)
+    
     # Load last saved weights to CNN model
     saved_weights = glob.glob(os.path.join(output_dir, "*.hdf5"))
     saved_weights.sort()
@@ -445,16 +455,16 @@ def predict_evaluate_cnn(model, batches, true_classes, df_classes, output_dir, w
     taxo_match = df_classes.set_index('classif_id').to_dict('index')
     
     # Convert true classes to larger ecological classes
-    true_classes_g = [taxo_match[t]['classif_id_2'] for t in true_classes]
+    true_classes_g = np.array([taxo_match[t]['classif_id_2'] for t in true_classes])
     
     # Convert predicted classes to larger ecological classes
-    predicted_classes_g = [taxo_match[p]['classif_id_2'] for p in predicted_classes]
+    predicted_classes_g = np.array([taxo_match[p]['classif_id_2'] for p in predicted_classes])
     
     # Compute accuracy, precision and recall for living classes and loss from true labels and predicted labels
     accuracy_g = accuracy_score(true_classes_g, predicted_classes_g)
     balanced_accuracy_g = balanced_accuracy_score(true_classes_g, predicted_classes_g)
-    eco_rev_precision_g = precision_score(true_classes_g, predicted_classes_g, labels=eco_rev_classes, average='weighted', zero_division=0)
-    eco_rev_recall_g = recall_score(true_classes_g, predicted_classes_g, labels=eco_rev_classes, average='weighted', zero_division=0)
+    eco_rev_precision_g = precision_score(true_classes_g, predicted_classes_g, labels=eco_rev_classes_g, average='weighted', zero_division=0)
+    eco_rev_recall_g = recall_score(true_classes_g, predicted_classes_g, labels=eco_rev_classes_g, average='weighted', zero_division=0)
     
     # Display results
     print(f'Grouped test accuracy = {accuracy_g}')
