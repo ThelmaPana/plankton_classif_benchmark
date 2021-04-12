@@ -31,6 +31,7 @@ n_jobs      = rf_settings['n_jobs']
 use_weights = rf_settings['use_weights'] 
 weights     = rf_settings['weights']
 
+eval_metric          = rf_settings['grid_search']['eval_metric']
 max_features_try     = rf_settings['grid_search']['max_features_try']
 min_samples_leaf_try = rf_settings['grid_search']['min_samples_leaf_try']
 n_estimators_try     = rf_settings['grid_search']['n_estimators_try']
@@ -108,6 +109,7 @@ if rf_settings['grid_search']['go']:
     gs_results, best_params = models.gridsearch_rf(
         df_train, 
         df_valid, 
+        eval_metric=eval_metric,
         max_features_try=max_features_try,
         min_samples_leaf_try=min_samples_leaf_try,
         n_estimators_try=n_estimators_try,
@@ -121,7 +123,6 @@ if rf_settings['grid_search']['go']:
     n_estimators = best_params['n_estimators']
     max_features = best_params['max_features']
     min_samples_leaf = best_params['min_samples_leaf']
-    print(f'Selected parameters are: n_estimators = {n_estimators}, max_features = {max_features}, min_samples_leaf = {min_samples_leaf}')
 
 
 ## Fit the RF of training data

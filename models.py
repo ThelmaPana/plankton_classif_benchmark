@@ -16,13 +16,14 @@ from tensorflow.keras import layers, optimizers, losses, callbacks
 import tensorflow_addons as tfa
 
 
-def gridsearch_rf(df1, df2, max_features_try, min_samples_leaf_try, n_estimators_try, output_dir, n_jobs, class_weights=None, random_state=None):
+def gridsearch_rf(df1, df2, eval_metric, max_features_try, min_samples_leaf_try, n_estimators_try, output_dir, n_jobs, class_weights=None, random_state=None):
     """
     Perform a grid search to find best hyperparameters for random forest model.
     
     Args:
         df1 (DataFrame): training data to use to fit grid search
-        df2 (DataFrame): validation data to use to evaluate grid search        
+        df2 (DataFrame): validation data to use to evaluate grid search
+        eval_metric (str): metric to use for hyperparameters selection ('accuracy' or 'balanced_accuracy')
         max_features_try (list): tries for number of variables per node; default sqrt(nb of vars)
         min_samples_leaf_try (list): tries for min number of objects in leaf; default for classif = 5
         n_estimators_try (list): tries for number of estimators (usually between 100 and 500)
@@ -30,10 +31,11 @@ def gridsearch_rf(df1, df2, max_features_try, min_samples_leaf_try, n_estimators
         n_jobs (int): number of cores to use 
         class_weights (dict): weights for classes
         random_state (int or RandomState): controls both the randomness of the bootstrapping and features sampling; default=None
+
     
     Returns:
         results (DataFrame): results of grid search
-        best_params (dict): best parameters based on validation accuracy value
+        best_params (dict): best parameters based on evaluation metric
     """
     
     # Shuffle data
@@ -61,7 +63,8 @@ def gridsearch_rf(df1, df2, max_features_try, min_samples_leaf_try, n_estimators
         'n_estimators': [],
         'max_features': [],
         'min_samples_leaf': [],
-        'valid_accuracy': []
+        'valid_accuracy': [],
+        'valid_balanced_accuracy':[]
     }
 
     # First loop on parameters other than n_estimators
@@ -92,24 +95,31 @@ def gridsearch_rf(df1, df2, max_features_try, min_samples_leaf_try, n_estimators
             
             # Compute accuracy on validation data
             valid_accuracy = accuracy_score(y_valid, rf.predict(X_valid))
+            valid_balanced_accuracy = balanced_accuracy_score(y_valid, rf.predict(X_valid))
             
             # Store results in dict
             results['n_estimators'].append(n_estimators)
             results['max_features'].append(max_features)
             results['min_samples_leaf'].append(min_samples_leaf)
-            results['valid_accuracy'].append(valid_accuracy)
+            results['valid_accuracy'].append(valid_accuracy) 
+            results['valid_balanced_accuracy'].append(valid_balanced_accuracy) 
 
-    # Write training history 
+    # Write gridsearch results
     with open(os.path.join(output_dir, 'train_results.pickle'),'wb') as results_file:
         pickle.dump(results, results_file)
         
     # Convert to datfarame
     results = pd.DataFrame(results)
     
-    # Extract best parameters based on validation accuracy value
-    best_params = results.nlargest(1, 'valid_accuracy').reset_index(drop=True).drop('valid_accuracy', axis=1)
+    # Extract best parameters based on evaluation metric value on validation data
+    best_params = results.nlargest(1, 'valid_'+ eval_metric).reset_index(drop=True).drop(['valid_accuracy', 'valid_balanced_accuracy'], axis=1)
     best_params = best_params.iloc[0].to_dict()
+        
+    # Print GS results
+    print(f"Hyperparameters selection using {eval_metric} value.")
+    print(f"Selected hyperparameters are: n_estimators = {best_params['n_estimators']}, max_features = {best_params['max_features']}, min_samples_leaf = {best_params['min_samples_leaf']}")
     
+
     return results, best_params
 
 

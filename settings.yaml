@@ -8,15 +8,16 @@ global:
     # Input data
     input_data:
       instrument: 'zooscan' # name of the instrument. 
-      frac: 0.1 # fraction ]0,1] of dataset to be used (usefull to generate a smaller dataset for testing)
+      frac: 0.3 # fraction ]0,1] of dataset to be used (usefull to generate a smaller dataset for testing)
 
 # Random Forest
 rf:
-  n_jobs: 6 # number of cores to use for random forest fitting
+  n_jobs: 24 # number of cores to use for random forest fitting
   use_weights: true # whether to use class weights for training
-  weights: 'sqrt_i_f' # method for weights computation. 'i_f' for inverse frequency, 'sqrt_i_f' for square root of inverse frequency
+  weights: 'i_f' # method for weights computation. 'i_f' for inverse frequency, 'sqrt_i_f' for square root of inverse frequency
   grid_search:
     go: true # whether to do a gridsearch to find optimal hyperparameters
+    eval_metric: 'accuracy' # metric value used to select optimal hyperparameters. 'accuracy' or 'balanced_accuracy'  
     max_features_try: [4, 6, 8, 10] # values to try for max_features, i.e. number of features to use to compute each split (default for classification is sqrt(n_features))
     min_samples_leaf_try: [2, 5, 10] # values to try for min_samples_leaf, i.e. minimum number of samples required to be at a leaf node (default for classification is 5)
     n_estimators_try: [100, 200, 350, 500] # values to try for n_estimators, i.e. number of trees
@@ -32,8 +33,8 @@ cnn:
     px_del: 31 # number of pixels to delete at bottom of images (e.g. to remove a scale bar)
     preserve_size: false # whether to perserve size of organisms when images are resized for cnn input.
     # If true, small images will be padded to desired size; if false, small images will be resized to desired size. 
-    augment: true # wheter to use data augmentation for training
-    use_weights: false # whether to use class weights for training
+    augment: false # wheter to use data augmentation for training
+    use_weights: true # whether to use class weights for training
     weights: 'sqrt_i_f' # method for weights computation. 'i_f' for inverse frequency, 'sqrt_i_f' for square root of inverse frequency
   
   architecture:
@@ -50,6 +51,6 @@ cnn:
     loss: 'cce' # computation of loss. 'cce' for categorical cross entropy; 'sfce' for sigmoid focal cross entropy.
 
   training:
-    epochs: 10 # number of epochs to train for
+    epochs: 3 # number of epochs to train for
     workers: 10 # number of parallel threads for data generators
     
