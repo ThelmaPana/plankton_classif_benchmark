@@ -181,7 +181,6 @@ def predict_evaluate_rf(rf_model, df, df_classes, output_dir):
     
     # Split data and labels
     y = df['classif_id'].tolist()
-    y.sort()
     y = np.array(y)
     X = df.drop('classif_id', axis=1)
 
