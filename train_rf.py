@@ -10,8 +10,7 @@ import math
 import tarfile
 import shutil
 import datetime
-from plotnine import *
-from sklearn.metrics import accuracy_score
+#from plotnine import *
 
 #################################### Settings ####################################       
 ## Read settings
