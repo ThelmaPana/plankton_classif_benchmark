@@ -102,7 +102,7 @@ def check_cnn():
     # Open the yaml settings file and extract cnn settings
     with open('settings.yaml', 'r') as file:
         settings = yaml.load(file, Loader=yaml.FullLoader)['cnn']
-    
+
     # data
     assert isinstance(settings['data']['batch_size'], int) and \
         (settings['data']['batch_size'] > 0), \
@@ -161,6 +161,8 @@ def check_cnn():
         'cnn > compilation > loss should be "cce" or "sfce"'
     
     # training
+    assert (isinstance(settings['training']['resume'], bool)), \
+        'cnn > training > resume should be a boolean'
     assert (isinstance(settings['training']['epochs'], int)) and \
         (settings['training']['epochs'] > 0), \
         'cnn > training > epochs should be a positive integer'

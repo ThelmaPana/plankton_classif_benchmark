@@ -330,15 +330,17 @@ def compile_cnn(model, lr_method, initial_lr, steps_per_epoch, decay_rate=None, 
 
     ## Learning rate
     if lr_method == 'decay':
-        lr = optimizers.schedules.InverseTimeDecay(
-                    initial_lr, steps_per_epoch, decay_rate, staircase=False, name=None
+        lr_schedule = optimizers.schedules.InverseTimeDecay(
+            initial_learning_rate=initial_lr, 
+            decay_steps=steps_per_epoch, 
+            decay_rate=decay_rate, 
+            staircase=False
         )
     else: # Keep constant learning rate
-        lr = initial_lr
-    
+        lr_schedule = initial_lr
+
     ## Optimizer: use Adam
-    optimizer = optimizers.Adam(learning_rate=lr)
-    
+    optimizer = optimizers.Adam(learning_rate=lr_schedule)
     
     ## Loss
     if loss == 'cce':
@@ -350,21 +352,53 @@ def compile_cnn(model, lr_method, initial_lr, steps_per_epoch, decay_rate=None, 
     model.compile(
       optimizer=optimizer,
       loss=loss,
-      metrics='accuracy'
+      metrics=['accuracy']
     )
     
     return model
 
 
-def train_cnn(model, train_batches, valid_batches, batch_size, epochs, class_weights, output_dir, workers):
+def load_cnn(saved_model, glimpse=True):
+    """
+    Load a CNN model from a previous model, return index of last epoch and training history
+    
+    Args:
+        saved_model (str): path to model to load
+        glimpse(bool): whether to show a model summary
+    
+    Returns:
+        model (tensorflow.python.keras.engine.sequential.Sequential): CNN model
+        initial_epoch (int): last training epoch
+        history (dict): training history
+    """
+    
+    # Extract number of last training epoch
+    initial_epoch = int(saved_model.split('.')[-2])
+    
+    # Recreate the exact same model, including its weights and the optimizer
+    model = tf.keras.models.load_model(saved_model, custom_objects={'KerasLayer':hub.KerasLayer})
+    
+    if glimpse:
+        model.summary()
+        
+    # Load previous history
+    with open(os.path.join(os.path.dirname(saved_model), 'train_results.pickle'),'rb') as file:
+        history = pickle.load(file)
+    
+    return model, initial_epoch, history
+
+
+def train_cnn(model, prev_history, train_batches, valid_batches, batch_size, initial_epoch, epochs, class_weights, output_dir, workers):
     """
     Trains a CNN model. 
     
     Args:
         model (tensorflow.python.keras.engine.sequential.Sequential): CNN model to train
+        prev_history (dict or None): previous training history
         train_batches: batches of training data
         valid_batches: batches of validation data
         batch_size (int): size of batches
+        initial_epoch (int): epoch to start from
         epochs (int): number of epochs to train for
         class_weight(dict): weights for classes
         output_dir (str): directory where to save model weights
@@ -373,31 +407,55 @@ def train_cnn(model, train_batches, valid_batches, batch_size, epochs, class_wei
     Returns:
         nothing
     """
-    # Set callbacks
-    filepath = os.path.join(output_dir, "weights.{epoch:02d}.hdf5")
+    ## Set callbacks
+    # Checkpoint callback
     cp_callback = callbacks.ModelCheckpoint(
-        filepath=filepath,
+        filepath=os.path.join(output_dir, 'weights.{epoch:02d}.hdf5'),
         monitor='val_loss',
         save_best_only=True,
         mode='min',
-        save_weights_only=True,
+        save_weights_only=False,
         save_freq='epoch',
         verbose=1)
     
-    # Fit the model.
+    # Learning rate callback
+    lr_history = [] # initiate empty list to store lr values
+    class LearningRateLoggingCallback(callbacks.Callback):
+        # Get learning rate value at the beginning of each epoch
+        def on_epoch_begin(self, epoch, logs=lr_history):
+            optimizer = self.model.optimizer # get optimizer
+            lr_value = optimizer.lr(optimizer.iterations).numpy() # get lr value
+            lr_history.append(lr_value) # append lr value to list of lr values
+            print(f'LR is {lr_value}') # print lr value
+    
+    # Fit the model
     history = model.fit(
         train_batches, 
         epochs=epochs,
+        initial_epoch=initial_epoch,
         validation_data=valid_batches,
-        callbacks=[cp_callback],
+        callbacks=[cp_callback, LearningRateLoggingCallback()],
         class_weight=class_weights,
         max_queue_size=max(10, workers*2),
         workers=workers
     )
+    training_history = history.history
+    
+    # Add learning rate logging to training history
+    training_history['lr'] = lr_history
+    
+    # Look for previous history to merge with
+    if prev_history:
+        for k in prev_history.keys():
+            prev_history[k].extend(training_history[k])
+        training_history = prev_history
     
     # Write training history 
     with open(os.path.join(output_dir, "train_results.pickle"),"wb") as results_file:
-        pickle.dump(history.history, results_file)
+        pickle.dump(training_history, results_file)
+    
+    # Save the last epoch to resume training if needed
+    model.save(os.path.join(output_dir, 'model.last.epoch.' + str(epochs).zfill(3) + '.hdf5'))
     
     return history
 

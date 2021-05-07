@@ -10,12 +10,14 @@ import shutil
 import datetime
 import numpy as np
 import math
+import pickle
 
 import read_settings
 import datasets
 import models
 import matplotlib.pyplot as plt
 import tensorflow as tf
+
 
 #gpus = tf.config.experimental.list_physical_devices('GPU')
 #tf.config.experimental.set_memory_growth(gpus[0], True)
@@ -54,7 +56,8 @@ initial_lr = cnn_settings['compilation']['initial_lr']
 decay_rate = cnn_settings['compilation']['decay_rate']
 loss       = cnn_settings['compilation']['loss']
 
-epochs = cnn_settings['training']['epochs']
+resume  = cnn_settings['training']['resume']
+epochs  = cnn_settings['training']['epochs']
 workers = cnn_settings['training']['workers']
 
 
@@ -67,29 +70,55 @@ else: # if not using weigths
 
 # Look for previous outputs with same pattern
 prev_output = glob.glob(output_dir_patt + '*')
-# If an previous output exists, make a tar.gz archive
-if prev_output:
-    prev_output = prev_output[0]
-    with tarfile.open(prev_output + '.tar.gz', "w:gz") as tar:
-        tar.add(prev_output, arcname=os.path.basename(prev_output))
-        tar.close()
+prev_output.sort()
+
+# Case of not resuming from previous training
+if not resume:
+    # If an previous output exists, make a tar.gz archive
+    if prev_output:
+        prev_output = prev_output[0]
+        with tarfile.open(prev_output + '.tar.gz', 'w:gz') as tar:
+            tar.add(prev_output, arcname=os.path.basename(prev_output))
+            tar.close()
+        
+        # Delete directory with old output
+        shutil.rmtree(prev_output)
+         
+        # Check if a directory exists for old outputs
+        old_output_dir = os.path.join('output', 'old')
+        # If it does not exist, create it
+        if not os.path.exists(old_output_dir):
+            os.makedirs(old_output_dir)
     
-    # Delete directory with old output
-    shutil.rmtree(prev_output)
-     
-    # Check if a directory exists for old outputs
-    old_output_dir = os.path.join('output', 'old')
-    # If it does not exist, create it
-    if not os.path.exists(old_output_dir):
-        os.makedirs(old_output_dir)
+        # Move tar.gz file with old outputs
+        shutil.move(prev_output + '.tar.gz', os.path.join(old_output_dir, os.path.basename(prev_output) + '.tar.gz'))
+        
+    # Create a new output directory
+    output_dir = '_'.join([output_dir_patt, datetime.datetime.now().strftime('%Y%m%d-%H%M%S-%f')])
+    print(f'Creating new output directory {output_dir}')
+    os.mkdir(output_dir)
 
-    # Move tar.gz file with old outputs
-    shutil.move(prev_output + '.tar.gz', os.path.join(old_output_dir, os.path.basename(prev_output) + '.tar.gz'))
-
-# Create a new output directory
-output_dir = '_'.join([output_dir_patt, datetime.datetime.now().strftime("%Y%m%d-%H%M%S-%f")])
-os.mkdir(output_dir)
-
+# Case of resuming from previous training
+else:
+    # Look for saved model in most recent output
+    saved_models = glob.glob(os.path.join(prev_output[-1], 'model.last.epoch.*.hdf5'))
+    saved_models.sort()
+    
+    # Case of an existing previous output to resume from
+    if len(saved_models) > 0:
+        # Set output dir to the most recent previous output
+        output_dir = prev_output[-1]
+        # Choose most recent model
+        saved_model = saved_models[-1]
+        print(f'Resuming training from {output_dir}, found saved model {os.path.basename(saved_model)}')
+        
+    # Case of no existing previous output to resume from
+    else:
+        # Create a new output directory
+        output_dir = '_'.join([output_dir_patt, datetime.datetime.now().strftime('%Y%m%d-%H%M%S-%f')])
+        print(f'No previous training to resume from, creating new output directory {output_dir}')
+        os.mkdir(output_dir)
+        
 # Write settings to output directory
 read_settings.write_cnn_settings(global_settings, cnn_settings, output_dir)
 
@@ -158,43 +187,60 @@ test_batches = datasets.DataGenerator(
 )
 
 for image_batch, label_batch in train_batches:
-    print("Image batch shape: ", image_batch.shape)
-    print("Label batch shape: ", label_batch.shape)
+    print('Image batch shape: ', image_batch.shape)
+    print('Label batch shape: ', label_batch.shape)
     break
 
-## Generate CNN
-my_cnn = models.create_cnn(
-    fc_layers_nb,
-    fc_layers_dropout, 
-    fc_layers_size, 
-    classif_layer_dropout, 
-    classif_layer_size=nb_classes, 
-    train_fe=train_fe, 
-    glimpse=True
-)
 
-## Compile CNN
-my_cnn = models.compile_cnn(
-    my_cnn, 
-    lr_method=lr_method, 
-    initial_lr=initial_lr, 
-    steps_per_epoch=len(train_batches), 
-    decay_rate=decay_rate, 
-    loss=loss
-)
+## Case of not resuming from previous training
+if not resume:
+    ## Generate CNN
+    my_cnn = models.create_cnn(
+        fc_layers_nb,
+        fc_layers_dropout, 
+        fc_layers_size, 
+        classif_layer_dropout, 
+        classif_layer_size=nb_classes, 
+        train_fe=train_fe, 
+        glimpse=True
+    )
+    
+    ## Compile CNN
+    my_cnn = models.compile_cnn(
+        my_cnn, 
+        lr_method=lr_method, 
+        initial_lr=initial_lr, 
+        steps_per_epoch=len(train_batches), 
+        decay_rate=decay_rate, 
+        loss=loss
+    )
+    
+    # Set firts epoch to 0
+    initial_epoch = 0
+    # Declare no previous training history
+    prev_history = None
+
+
+## Case of resuming from previous training
+else:
+    my_cnn, initial_epoch, prev_history = models.load_cnn(saved_model, glimpse = True)
+
 
 ## Train CNN
 history = models.train_cnn(
     model=my_cnn, 
+    prev_history=prev_history,
     train_batches=train_batches, 
     valid_batches=valid_batches, 
     batch_size=batch_size, 
-    epochs=epochs, 
+    initial_epoch=initial_epoch,
+    epochs=epochs+initial_epoch, 
     class_weights=class_weights, 
     output_dir=output_dir,
     workers=workers,
 )
 
+    
 ## Predict test batches and evaluate CNN
 models.predict_evaluate_cnn(
     model=my_cnn, 
