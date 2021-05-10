@@ -108,6 +108,7 @@ if rf_settings['grid_search']['go']:
     gs_results, best_params = models.gridsearch_rf(
         df_train, 
         df_valid, 
+        classes = df_classes.classif_id.tolist(),
         eval_metric=eval_metric,
         max_features_try=max_features_try,
         min_samples_leaf_try=min_samples_leaf_try,

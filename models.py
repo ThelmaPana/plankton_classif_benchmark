@@ -6,7 +6,8 @@ import pickle
 import glob
 
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import accuracy_score, balanced_accuracy_score, precision_score, recall_score
+from sklearn.preprocessing import MultiLabelBinarizer
+from sklearn.metrics import accuracy_score, balanced_accuracy_score, precision_score, recall_score, log_loss
 
 import tensorflow as tf
 import tensorflow_hub as hub
@@ -16,14 +17,15 @@ from tensorflow.keras import layers, optimizers, losses, callbacks
 import tensorflow_addons as tfa
 
 
-def gridsearch_rf(df1, df2, eval_metric, max_features_try, min_samples_leaf_try, n_estimators_try, output_dir, n_jobs, class_weights=None, random_state=None):
+def gridsearch_rf(df_train, df_valid, classes, eval_metric, max_features_try, min_samples_leaf_try, n_estimators_try, output_dir, n_jobs, class_weights=None, random_state=None):
     """
     Perform a grid search to find best hyperparameters for random forest model.
     
     Args:
-        df1 (DataFrame): training data to use to fit grid search
-        df2 (DataFrame): validation data to use to evaluate grid search
-        eval_metric (str): metric to use for hyperparameters selection ('accuracy' or 'balanced_accuracy')
+        df_train (DataFrame): training data to use to fit grid search
+        df_valid (DataFrame): validation data to use to evaluate grid search
+        classes (list, array): name of classes
+        eval_metric (str): metric to use for hyperparameters selection ('accuracy', 'balanced_accuracy' or 'log_loss')
         max_features_try (list): tries for number of variables per node; default sqrt(nb of vars)
         min_samples_leaf_try (list): tries for min number of objects in leaf; default for classif = 5
         n_estimators_try (list): tries for number of estimators (usually between 100 and 500)
@@ -39,15 +41,19 @@ def gridsearch_rf(df1, df2, eval_metric, max_features_try, min_samples_leaf_try,
     """
     
     # Shuffle data
-    df1 = df1.sample(frac=1, random_state=random_state).reset_index(drop=True)
-    df2 = df2.sample(frac=1, random_state=random_state).reset_index(drop=True)
+    df_train = df_train.sample(frac=1, random_state=random_state).reset_index(drop=True)
+    df_valid = df_valid.sample(frac=1, random_state=random_state).reset_index(drop=True)
     
     # Split data and labels
-    y_train = df1['classif_id']
-    X_train = df1.drop('classif_id', axis=1)
+    y_train = df_train['classif_id']
+    X_train = df_train.drop('classif_id', axis=1)
     
-    y_valid = df2['classif_id']
-    X_valid = df2.drop('classif_id', axis=1)
+    y_valid = df_valid['classif_id']
+    X_valid = df_valid.drop('classif_id', axis=1)
+    
+    # Prepare one-hot encoding to compute log-loss for validation data
+    mlb = MultiLabelBinarizer(classes=classes)
+    y_true = mlb.fit_transform([[l] for l in y_valid])
     
     # Build grid of hyperparameters to explore
     grid = {
@@ -64,7 +70,8 @@ def gridsearch_rf(df1, df2, eval_metric, max_features_try, min_samples_leaf_try,
         'max_features': [],
         'min_samples_leaf': [],
         'valid_accuracy': [],
-        'valid_balanced_accuracy':[]
+        'valid_balanced_accuracy':[],
+        'valid_log_loss':[]
     }
 
     # First loop on parameters other than n_estimators
@@ -97,12 +104,21 @@ def gridsearch_rf(df1, df2, eval_metric, max_features_try, min_samples_leaf_try,
             valid_accuracy = accuracy_score(y_valid, rf.predict(X_valid))
             valid_balanced_accuracy = balanced_accuracy_score(y_valid, rf.predict(X_valid))
             
+            # Compute log loss on validation data  
+            # log_loss only accepts weights as sample_weights and not as class_weights, compute sample_weights
+            if class_weights is not None:
+                sample_weight = [class_weights[c] for c in y_valid]
+            else:
+                sample_weight = None
+            valid_log_loss = log_loss(y_true, rf.predict_proba(X_valid), sample_weight=sample_weight)
+
             # Store results in dict
             results['n_estimators'].append(n_estimators)
             results['max_features'].append(max_features)
             results['min_samples_leaf'].append(min_samples_leaf)
             results['valid_accuracy'].append(valid_accuracy) 
             results['valid_balanced_accuracy'].append(valid_balanced_accuracy) 
+            results['valid_log_loss'].append(valid_log_loss) 
 
     # Write gridsearch results
     with open(os.path.join(output_dir, 'train_results.pickle'),'wb') as results_file:
@@ -112,13 +128,17 @@ def gridsearch_rf(df1, df2, eval_metric, max_features_try, min_samples_leaf_try,
     results = pd.DataFrame(results)
     
     # Extract best parameters based on evaluation metric value on validation data
-    best_params = results.nlargest(1, 'valid_'+ eval_metric).reset_index(drop=True).drop(['valid_accuracy', 'valid_balanced_accuracy'], axis=1)
+    if eval_metric == 'log_loss':
+        # if evaluation metric is log loss, look for the smallest value
+        best_params = results.nsmallest(1, 'valid_'+ eval_metric).reset_index(drop=True).drop(['valid_accuracy', 'valid_balanced_accuracy', 'valid_log_loss'], axis=1)
+    else:
+        # in other cases, look for the largest value
+        best_params = results.nlargest(1, 'valid_'+ eval_metric).reset_index(drop=True).drop(['valid_accuracy', 'valid_balanced_accuracy', 'valid_log_loss'], axis=1)
     best_params = best_params.iloc[0].to_dict()
         
     # Print GS results
     print(f"Hyperparameters selection using {eval_metric} value.")
     print(f"Selected hyperparameters are: n_estimators = {best_params['n_estimators']}, max_features = {best_params['max_features']}, min_samples_leaf = {best_params['min_samples_leaf']}")
-    
 
     return results, best_params
 

@@ -65,8 +65,8 @@ def check_rf():
     # if a gridsearch is done, values must be provided for evaluation metric and hyperparameters to try
     if settings['grid_search']['go']:
         assert isinstance(settings['grid_search']['eval_metric'], str) and \
-            settings['grid_search']['eval_metric'] in ['accuracy', 'balanced_accuracy'], \
-            'rf > grid_search > eval_metric should be "accuracy" or "balanced_accuracy"'
+            settings['grid_search']['eval_metric'] in ['accuracy', 'balanced_accuracy', 'log_loss'], \
+            'rf > grid_search > eval_metric should be "accuracy", "balanced_accuracy" or "log_loss"'
         assert (isinstance(settings['grid_search']['max_features_try'], list)) and \
             (sum([isinstance(x, (int, float)) for x in settings['grid_search']['max_features_try']]) == \
              len(settings['grid_search']['max_features_try'])),\
