@@ -80,7 +80,7 @@ def gridsearch_rf(df_train, df_valid, classes, eval_metric, max_features_try, mi
     
         # Initiate a RF model with warm start
         rf = RandomForestClassifier(
-            criterion='gini', 
+            criterion='entropy', 
             min_samples_split=2, 
             max_features=max_features, 
             min_samples_leaf=min_samples_leaf,
@@ -170,7 +170,7 @@ def train_rf(df, n_estimators, max_features, min_samples_leaf, n_jobs, class_wei
     # Initiate RF model
     rf = RandomForestClassifier(
         n_estimators=n_estimators, 
-        criterion='gini', 
+        criterion='entropy', 
         min_samples_split=2, 
         min_samples_leaf=min_samples_leaf, 
         max_features=max_features,
