@@ -8,7 +8,7 @@ global:
     # Input data
     input_data:
       instrument: 'isiis' # name of the instrument. 
-      frac: 0.3 # fraction ]0,1] of dataset to be used (usefull to generate a smaller dataset for testing)
+      frac: 0.5 # fraction ]0,1] of dataset to be used (usefull to generate a smaller dataset for testing)
 
 # Random Forest
 rf:
@@ -34,7 +34,7 @@ cnn:
     preserve_size: false # whether to perserve size of organisms when images are resized for cnn input.
     # If true, small images will be padded to desired size; if false, small images will be resized to desired size. 
     augment: true # wheter to use data augmentation for training
-    use_weights: true # whether to use class weights for training
+    use_weights: false # whether to use class weights for training
     weights: 'sqrt_i_f' # method for weights computation. 'i_f' for inverse frequency, 'sqrt_i_f' for square root of inverse frequency
   
   architecture:
@@ -47,7 +47,7 @@ cnn:
   compilation:
     lr_method: 'decay' # learning rate evolution. 'decay' for a decaying learning rate; 'constant' for a constant learning rate
     initial_lr: 0.001 # initial learning rate
-    decay_rate: 0.97 # rate for learning rate decay
+    decay_rate: 0.35 # rate for learning rate decay
     loss: 'cce' # computation of loss. 'cce' for categorical cross entropy; 'sfce' for sigmoid focal cross entropy.
 
   training:

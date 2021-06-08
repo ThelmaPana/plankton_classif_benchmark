@@ -72,7 +72,7 @@ else: # if not using weigths
 prev_output = glob.glob(output_dir_patt + '*')
 prev_output.sort()
 
-# Case of not resuming from previous training
+# Case of not resuming from previous CNN training
 if not resume:
     # If an previous output exists, make a tar.gz archive
     if prev_output:
@@ -98,8 +98,11 @@ if not resume:
     print(f'Creating new output directory {output_dir}')
     os.mkdir(output_dir)
 
-# Case of resuming from previous training
+# Case of resuming from previous CNN training
 else:
+    # Check that settings are similar as previous ones
+    read_settings.check_previous_cnn_settings(global_settings, cnn_settings, prev_output)
+    
     # Look for saved model in most recent output
     saved_models = glob.glob(os.path.join(prev_output[-1], 'model.last.epoch.*.hdf5'))
     saved_models.sort()

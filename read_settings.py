@@ -199,7 +199,7 @@ def write_rf_settings(global_settings, rf_settings, output_dir):
         
 def write_cnn_settings(global_settings, cnn_settings, output_dir):
     """
-    Write settings to output directory for random forest training. s
+    Write settings to output directory for random forest training.
     
     Args:
         global_settings (dict): global settings
@@ -218,4 +218,33 @@ def write_cnn_settings(global_settings, cnn_settings, output_dir):
     with open(os.path.join(output_dir, 'settings.pickle'),'wb') as settings_file:
         pickle.dump(settings, settings_file)
 
+    pass
+
+
+def check_previous_cnn_settings(global_settings, cnn_settings, prev_output):
+    """
+    When resuming CNN training, check that current settings are identical to previous ones.
+    If not, raise an exception.
+    
+    Args:
+        global_settings (dict): global settings
+        cnn_settings (dict): cnn settings
+        prev_output (str): name of training output to resume from
+        
+    """
+    
+    # Read settings from previous training
+    with open(os.path.join(prev_output[-1], 'settings.pickle'),'rb') as settings_file:
+        prev_settings = pickle.load(settings_file)
+    
+    # Check if all settings except ['cnn_settings']['training'] are identical
+    same_settings = (prev_settings['global_settings'] == global_settings) & \
+    (prev_settings['cnn_settings']['data'] == cnn_settings['data']) & \
+    (prev_settings['cnn_settings']['architecture'] == cnn_settings['architecture']) & \
+    (prev_settings['cnn_settings']['compilation'] == cnn_settings['compilation'])
+    
+    # If parameters are different, raise an exception
+    if not same_settings:
+        raise Exception('Trying to resume CNN training with parameters different from last training.') 
+    
     pass
