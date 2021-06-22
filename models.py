@@ -215,13 +215,13 @@ def predict_evaluate_rf(rf_model, df, df_classes, output_dir):
     classes_g.sort()
     classes_g = np.array(classes_g)
     
-    # Make a list of ecologically relevant classes
-    eco_rev_classes = df_classes[df_classes['eco_rev']]['classif_id'].tolist()
-    eco_rev_classes = np.array(eco_rev_classes)
+    # Make a list of plankton classes
+    plankton_classes = df_classes[df_classes['eco_rev']]['classif_id'].tolist()
+    plankton_classes = np.array(plankton_classes)
     
-    # Make a list of ecologically relevant classes for grouped classes
-    eco_rev_classes_g = df_classes[df_classes['eco_rev']]['classif_id_2'].tolist()
-    eco_rev_classes_g = np.array(eco_rev_classes_g)
+    # Make a list of plankton classes for grouped classes
+    plankton_classes_g = df_classes[df_classes['eco_rev']]['classif_id_2'].tolist()
+    plankton_classes_g = np.array(plankton_classes_g)
     
     # Predict test data
     y_pred = rf_model.predict(X)
@@ -229,14 +229,14 @@ def predict_evaluate_rf(rf_model, df, df_classes, output_dir):
     # Compute accuracy between true labels and predicted labels
     accuracy = accuracy_score(y, y_pred)
     balanced_accuracy = balanced_accuracy_score(y, y_pred)
-    eco_rev_precision = precision_score(y, y_pred, labels=eco_rev_classes, average='weighted', zero_division=0)
-    eco_rev_recall = recall_score(y, y_pred, labels=eco_rev_classes, average='weighted', zero_division=0)
+    plankton_precision = precision_score(y, y_pred, labels=plankton_classes, average='weighted', zero_division=0)
+    plankton_recall = recall_score(y, y_pred, labels=plankton_classes, average='weighted', zero_division=0)
     
     # Display results
     print(f'Test accuracy = {accuracy}')
     print(f'Balanced test accuracy = {balanced_accuracy}')
-    print(f'Weighted ecologically relevant precision = {eco_rev_precision}')
-    print(f'Weighted ecologically relevant recall = {eco_rev_recall}')
+    print(f'Weighted plankton precision = {plankton_precision}')
+    print(f'Weighted plankton recall = {plankton_recall}')
      
     ## Now do the same after regrouping objects to larger classes
     # Generate taxonomy match between taxo used for classif and larger ecological classes 
@@ -251,34 +251,34 @@ def predict_evaluate_rf(rf_model, df, df_classes, output_dir):
     # Compute accuracy, precision and recall for living classes and loss from true labels and predicted labels
     accuracy_g = accuracy_score(y_g, y_pred_g)
     balanced_accuracy_g = balanced_accuracy_score(y_g, y_pred_g)
-    eco_rev_precision_g = precision_score(y_g, y_pred_g, labels=eco_rev_classes_g, average='weighted', zero_division=0)
-    eco_rev_recall_g = recall_score(y_g, y_pred_g, labels=eco_rev_classes_g, average='weighted', zero_division=0)
+    plankton_precision_g = precision_score(y_g, y_pred_g, labels=plankton_classes_g, average='weighted', zero_division=0)
+    plankton_recall_g = recall_score(y_g, y_pred_g, labels=plankton_classes_g, average='weighted', zero_division=0)
     
     # Display results
     print(f'Grouped test accuracy = {accuracy_g}')
     print(f'Grouped balanced test accuracy = {balanced_accuracy_g}')
-    print(f'Grouped weighted ecologically relevant precision = {eco_rev_precision_g}')
-    print(f'Grouped weighted ecologically relevant recall = {eco_rev_recall_g}')
+    print(f'Grouped weighted plankton precision = {plankton_precision_g}')
+    print(f'Grouped weighted plankton recall = {plankton_recall_g}')
 
     # Write classes and test metrics into a test file
     with open(os.path.join(output_dir, 'test_results.pickle'),'wb') as test_file:
         pickle.dump({
             'classes': classes,
             'classes_g': classes_g,
-            'eco_rev_classes': eco_rev_classes,
-            'eco_rev_classes_g': eco_rev_classes_g,
+            'plankton_classes': plankton_classes,
+            'plankton_classes_g': plankton_classes_g,
             'true_classes': y,
             'predicted_classes': y_pred,
             'true_classes_g': y_g,
             'predicted_classes_g': y_pred_g,
             'accuracy': accuracy,
             'balanced_accuracy': balanced_accuracy,
-            'eco_rev_precision': eco_rev_precision,
-            'eco_rev_recall': eco_rev_recall,
+            'plankton_precision': plankton_precision,
+            'plankton_recall': plankton_recall,
             'accuracy_g': accuracy_g,
             'balanced_accuracy_g': balanced_accuracy_g,
-            'eco_rev_precision_g': eco_rev_precision_g,
-            'eco_rev_recall_g': eco_rev_recall_g,
+            'plankton_precision_g': plankton_precision_g,
+            'plankton_recall_g': plankton_recall_g,
         },
         test_file)
 
@@ -425,14 +425,15 @@ def train_cnn(model, prev_history, train_batches, valid_batches, batch_size, ini
         workers (int): number of parallel threads for data generators
     
     Returns:
-        nothing
+        history (tensorflow.python.keras.callbacks.History): training history
+        best_epoch (int): index of best epoch
     """
     ## Set callbacks
     # Checkpoint callback
     cp_callback = callbacks.ModelCheckpoint(
         filepath=os.path.join(output_dir, 'weights.{epoch:02d}.hdf5'),
         monitor='val_loss',
-        save_best_only=True,
+        save_best_only=False,
         mode='min',
         save_weights_only=False,
         save_freq='epoch',
@@ -477,10 +478,14 @@ def train_cnn(model, prev_history, train_batches, valid_batches, batch_size, ini
     # Save the last epoch to resume training if needed
     model.save(os.path.join(output_dir, 'model.last.epoch.' + str(epochs).zfill(3) + '.hdf5'))
     
-    return history
+    # Compute index of best epoch based on validation accuracy
+    # NB: add 1 because python indexing starts from 0 and epochs start from 1
+    best_epoch = np.argmin(training_history['val_loss']) + 1
+    
+    return history, best_epoch
 
 
-def predict_evaluate_cnn(model, batches, true_classes, df_classes, output_dir, workers):
+def predict_evaluate_cnn(model, best_epoch, batches, true_classes, df_classes, output_dir, workers):
     """
     Predict batches and evaluate a CNN model.
     Predict images from test set and compute accuracy, balanced_accuracy, precision and recall on relevant classes.
@@ -488,6 +493,7 @@ def predict_evaluate_cnn(model, batches, true_classes, df_classes, output_dir, w
     
     Args:
         model (tensorflow.python.keras.engine.sequential.Sequential): CNN model to evaluate
+        best_epoch(int): index of the best epoch, used to test the model
         batches (datasets.DataGenerator): batches of test data to predict
         true_classes (list): true classes of test images
         df_classes (DataFrame): dataframe of classes with living attribute
@@ -509,18 +515,17 @@ def predict_evaluate_cnn(model, batches, true_classes, df_classes, output_dir, w
     classes_g.sort()
     classes_g = np.array(classes_g)
     
-    # Make a list of ecologically relevant classes
-    eco_rev_classes = df_classes[df_classes['eco_rev']]['classif_id'].tolist()
-    eco_rev_classes = np.array(eco_rev_classes)
+    # Make a list of plankton classes
+    plankton_classes = df_classes[df_classes['eco_rev']]['classif_id'].tolist()
+    plankton_classes = np.array(plankton_classes)
     
-    # Make a list of ecologically relevant classes for grouped classes
-    eco_rev_classes_g = df_classes[df_classes['eco_rev']]['classif_id_2'].tolist()
-    eco_rev_classes_g = np.array(eco_rev_classes_g)
+    # Make a list of plankton classes for grouped classes
+    plankton_classes_g = df_classes[df_classes['eco_rev']]['classif_id_2'].tolist()
+    plankton_classes_g = np.array(plankton_classes_g)
     
-    # Load last saved weights to CNN model
-    saved_weights = glob.glob(os.path.join(output_dir, "*.hdf5"))
-    saved_weights.sort()
-    model.load_weights(saved_weights[-1])
+    # Load best epoch weights to CNN model
+    model.load_weights(os.path.join(output_dir, (f'weights.{best_epoch:02d}.hdf5')))
+    print(f'Loading weights of epoch number {best_epoch} to evaluate CNN model.')
     
     # Predict test batches and convert predictions to plankton classes
     logits = model.predict(batches, max_queue_size=max(10, workers*2), workers=workers)
@@ -529,14 +534,14 @@ def predict_evaluate_cnn(model, batches, true_classes, df_classes, output_dir, w
     # Compute accuracy, precision and recall for living classes and loss from true labels and predicted labels
     accuracy = accuracy_score(true_classes, predicted_classes)
     balanced_accuracy = balanced_accuracy_score(true_classes, predicted_classes)
-    eco_rev_precision = precision_score(true_classes, predicted_classes, labels=eco_rev_classes, average='weighted', zero_division=0)
-    eco_rev_recall = recall_score(true_classes, predicted_classes, labels=eco_rev_classes, average='weighted', zero_division=0)
+    plankton_precision = precision_score(true_classes, predicted_classes, labels=plankton_classes, average='weighted', zero_division=0)
+    plankton_recall = recall_score(true_classes, predicted_classes, labels=plankton_classes, average='weighted', zero_division=0)
     
     # Display results
     print(f'Test accuracy = {accuracy}')
     print(f'Balanced test accuracy = {balanced_accuracy}')
-    print(f'Weighted ecologically relevant precision = {eco_rev_precision}')
-    print(f'Weighted ecologically relevant recall = {eco_rev_recall}')
+    print(f'Weighted plankton precision = {plankton_precision}')
+    print(f'Weighted plankton recall = {plankton_recall}')
     
     ## Now do the same after regrouping objects to larger classes
     # Generate taxonomy match between taxo used for classif and larger ecological classes 
@@ -551,34 +556,34 @@ def predict_evaluate_cnn(model, batches, true_classes, df_classes, output_dir, w
     # Compute accuracy, precision and recall for living classes and loss from true labels and predicted labels
     accuracy_g = accuracy_score(true_classes_g, predicted_classes_g)
     balanced_accuracy_g = balanced_accuracy_score(true_classes_g, predicted_classes_g)
-    eco_rev_precision_g = precision_score(true_classes_g, predicted_classes_g, labels=eco_rev_classes_g, average='weighted', zero_division=0)
-    eco_rev_recall_g = recall_score(true_classes_g, predicted_classes_g, labels=eco_rev_classes_g, average='weighted', zero_division=0)
+    plankton_precision_g = precision_score(true_classes_g, predicted_classes_g, labels=plankton_classes_g, average='weighted', zero_division=0)
+    plankton_recall_g = recall_score(true_classes_g, predicted_classes_g, labels=plankton_classes_g, average='weighted', zero_division=0)
     
     # Display results
     print(f'Grouped test accuracy = {accuracy_g}')
     print(f'Grouped balanced test accuracy = {balanced_accuracy_g}')
-    print(f'Grouped weighted ecologically relevant precision = {eco_rev_precision_g}')
-    print(f'Grouped weighted ecologically relevant recall = {eco_rev_recall_g}')
+    print(f'Grouped weighted plankton precision = {plankton_precision_g}')
+    print(f'Grouped weighted plankton recall = {plankton_recall_g}')
     
     # Write classes and test metrics into a test file
     with open(os.path.join(output_dir, 'test_results.pickle'),'wb') as test_file:
         pickle.dump({
             'classes': classes,
             'classes_g': classes_g,
-            'eco_rev_classes': eco_rev_classes,
-            'eco_rev_classes_g': eco_rev_classes_g,
+            'plankton_classes': plankton_classes,
+            'plankton_classes_g': plankton_classes_g,
             'true_classes': true_classes,
             'predicted_classes': predicted_classes,
             'true_classes_g': true_classes_g,
             'predicted_classes_g': predicted_classes_g,
             'accuracy': accuracy,
             'balanced_accuracy': balanced_accuracy,
-            'eco_rev_precision': eco_rev_precision,
-            'eco_rev_recall': eco_rev_recall,
+            'plankton_precision': plankton_precision,
+            'plankton_recall': plankton_recall,
             'accuracy_g': accuracy_g,
             'balanced_accuracy_g': balanced_accuracy_g,
-            'eco_rev_precision_g': eco_rev_precision_g,
-            'eco_rev_recall_g': eco_rev_recall_g,
+            'plankton_precision_g': plankton_precision_g,
+            'plankton_recall_g': plankton_recall_g,
         },
         test_file)
 

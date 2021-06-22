@@ -230,7 +230,7 @@ else:
 
 
 ## Train CNN
-history = models.train_cnn(
+history, best_epoch = models.train_cnn(
     model=my_cnn, 
     prev_history=prev_history,
     train_batches=train_batches, 
@@ -247,6 +247,7 @@ history = models.train_cnn(
 ## Predict test batches and evaluate CNN
 models.predict_evaluate_cnn(
     model=my_cnn, 
+    best_epoch=best_epoch,
     batches=test_batches, 
     true_classes = np.array(df_test.classif_id.tolist()),
     df_classes=df_classes, 
