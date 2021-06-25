@@ -23,15 +23,15 @@ def read_data_cnn(path, frac=1, random_state=None):
         df_train (DataFrame): training data containing path to image and classif_id
         df_val (DataFrame): validation data containing path to image and classif_id
         df_test (DataFrame): testing data containing path to image and classif_id
-        df_classes (DataFrame): classes with their ecological relevance
+        df_classes (DataFrame): classes with their plankton attribute
         df_comp (DataFrame): dataset composition
     """
     
     # Read CSV file
     df = pd.read_csv(path).rename(columns = {'classif_id_1':'classif_id'})
     
-    # Extract classes ('classif_id_1' for model training and 'classif_id_2' for posterior ecological groupings) and ecological relevance
-    df_classes = df[['classif_id', 'classif_id_2', 'eco_rev']].drop_duplicates().sort_values('classif_id').reset_index(drop=True)
+    # Extract classes ('classif_id_1' for model training and 'classif_id_2' for posterior ecological groupings) and plankton attribute
+    df_classes = df[['classif_id', 'classif_id_2', 'plankton']].drop_duplicates().sort_values('classif_id').reset_index(drop=True)
     
     # The classifier is a CNN, keep 'classif_id_1', 'path_to_img' and 'set' split
     df = df[['path_to_img', 'classif_id', 'set']]
@@ -242,18 +242,18 @@ def read_data_rf(path, frac=1, random_state=None):
         df_train (DataFrame): training data containing object features and classif_id
         df_val (DataFrame): validation data containing object features and classif_id
         df_test (DataFrame): testing data containing object features and classif_id
-        df_classes (DataFrame): classes with their ecological relevance
+        df_classes (DataFrame): classes with their plankton attribute
         df_comp (DataFrame): dataset composition
     """
     
     # Read CSV file
     df = pd.read_csv(path).rename(columns = {'classif_id_1':'classif_id'})
     
-    # Extract classes ('classif_id_1' for model training and 'classif_id_2' for posterior ecological groupings) and ecological relevance
-    df_classes = df[['classif_id', 'classif_id_2', 'eco_rev']].drop_duplicates().sort_values('classif_id').reset_index(drop=True)
+    # Extract classes ('classif_id_1' for model training and 'classif_id_2' for posterior ecological groupings) and plankton attribute
+    df_classes = df[['classif_id', 'classif_id_2', 'plankton']].drop_duplicates().sort_values('classif_id').reset_index(drop=True)
     
     # Delete columns 'path_to_img' 
-    df = df.drop(columns=['path_to_img', 'classif_id_2', 'eco_rev'])
+    df = df.drop(columns=['path_to_img', 'classif_id_2', 'plankton'])
     
     # Fraction subsample 
     if frac < 1:

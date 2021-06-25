@@ -216,11 +216,11 @@ def predict_evaluate_rf(rf_model, df, df_classes, output_dir):
     classes_g = np.array(classes_g)
     
     # Make a list of plankton classes
-    plankton_classes = df_classes[df_classes['eco_rev']]['classif_id'].tolist()
+    plankton_classes = df_classes[df_classes['plankton']]['classif_id'].tolist()
     plankton_classes = np.array(plankton_classes)
     
     # Make a list of plankton classes for grouped classes
-    plankton_classes_g = df_classes[df_classes['eco_rev']]['classif_id_2'].tolist()
+    plankton_classes_g = df_classes[df_classes['plankton']]['classif_id_2'].tolist()
     plankton_classes_g = np.array(plankton_classes_g)
     
     # Predict test data
@@ -516,11 +516,11 @@ def predict_evaluate_cnn(model, best_epoch, batches, true_classes, df_classes, o
     classes_g = np.array(classes_g)
     
     # Make a list of plankton classes
-    plankton_classes = df_classes[df_classes['eco_rev']]['classif_id'].tolist()
+    plankton_classes = df_classes[df_classes['plankton']]['classif_id'].tolist()
     plankton_classes = np.array(plankton_classes)
     
     # Make a list of plankton classes for grouped classes
-    plankton_classes_g = df_classes[df_classes['eco_rev']]['classif_id_2'].tolist()
+    plankton_classes_g = df_classes[df_classes['plankton']]['classif_id_2'].tolist()
     plankton_classes_g = np.array(plankton_classes_g)
     
     # Load best epoch weights to CNN model
