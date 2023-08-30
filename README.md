@@ -3,7 +3,7 @@ Benchmark for plankton images classifications methods for images from multiple p
 
 This tool allows you to run a comparison between a Convolutional Neural Network and a Random Forest classifier on a dataset of plankton images. 
 
-Link to paper: https://docs.google.com/document/d/1pFkKo07n_23ZIclz11tnBPKEnYmTRYWxtYccPv9iqFE/edit?usp=sharing
+**Superseeded by `https://github.com/emmaamblard/plankton_classif/tree/main`. **
 
 ## Data
 ### Instruments
